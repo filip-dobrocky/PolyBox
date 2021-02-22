@@ -9,12 +9,18 @@ struct Note {
 
 class SequencerVoice {
 
-public:
+private:
 	int lenght;
-	std::vector<Note> sequence;
 	int position;
+
+public:
+	std::vector<Note> sequence;
+
+	int getPosition();
+	int getLength();
+	void setLength(int length);
 
 	void insertNote(int index, Note note);
 	void removeNote(int index);
-	void play();
+	void step();
 };
