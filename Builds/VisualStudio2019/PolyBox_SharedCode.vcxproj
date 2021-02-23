@@ -137,6 +137,7 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\SequencerVoice.cpp"/>
     <ClCompile Include="..\..\Source\PolySequencer.cpp"/>
     <ClCompile Include="..\..\Source\MicroSampler.cpp"/>
     <ClCompile Include="..\..\Source\PluginProcessor.cpp"/>

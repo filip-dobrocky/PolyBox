@@ -14,6 +14,8 @@ public:
 	std::vector<Note> sequence;
 	int position;
 
+	SequencerVoice(int length);
+
 	void insertNote(int index, Note note);
 	void removeNote(int index);
 	void play();
