@@ -1,6 +1,8 @@
 #pragma once
 #include <vector>
 
+#define DEFAULT_STEPS 8
+
 struct Note {
 	int number;
 	int velocity;
@@ -10,17 +12,16 @@ struct Note {
 class SequencerVoice {
 
 private:
-	int lenght;
+	int length;
 	int position;
 
 public:
-	std::vector<Note> sequence;
+	SequencerVoice(int length);
 
+	std::vector<Note> sequence;
 	int getPosition();
 	int getLength();
 	void setLength(int length);
-
-	SequencerVoice(int length);
 
 	void insertNote(int index, Note note);
 	void removeNote(int index);
