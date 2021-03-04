@@ -1,10 +1,13 @@
 #include "SequencerVoice.h"
 
+using namespace juce;
+
 SequencerVoice::SequencerVoice(int length)
 {
 	this->length = length;
 	this->position = 0;
 	sequence.reserve(length);
+	random = new Random(Time::currentTimeMillis());
 }
 
 int SequencerVoice::getLength()
@@ -39,11 +42,19 @@ void SequencerVoice::removeNote(int position)
 
 void SequencerVoice::step()
 {
-	// create midi note
+	Note note = sequence[position];
+
+	if (chance(note.probability))
+	{
+		// create midi note
+	}
 
 	if (++position == length)
 		position = 0;
 }
 
-
+bool SequencerVoice::chance(double probability)
+{
+	return random->nextDouble() >= probability;
+}
 

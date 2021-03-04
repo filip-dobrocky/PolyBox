@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <JuceHeader.h>
 
 #define DEFAULT_STEPS 8
 
@@ -14,6 +15,10 @@ class SequencerVoice {
 private:
 	int length;
 	int position;
+
+	juce::Random *random;
+
+	bool chance(double probability);
 
 public:
 	SequencerVoice(int length);
