@@ -137,6 +137,7 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Math.cpp"/>
     <ClCompile Include="..\..\Source\SequencerVoice.cpp"/>
     <ClCompile Include="..\..\Source\PolySequencer.cpp"/>
     <ClCompile Include="..\..\Source\MicroSampler.cpp"/>
@@ -2052,6 +2053,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Math.h"/>
     <ClInclude Include="..\..\Source\PolySequencer.h"/>
     <ClInclude Include="..\..\Source\SequencerVoice.h"/>
     <ClInclude Include="..\..\Source\MicroSampler.h"/>

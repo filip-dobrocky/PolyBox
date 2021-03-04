@@ -430,6 +430,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\Math.cpp">
+      <Filter>PolyBox\Source</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\SequencerVoice.cpp">
       <Filter>PolyBox\Source</Filter>
     </ClCompile>
@@ -2496,6 +2499,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\Math.h">
+      <Filter>PolyBox\Source</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\PolySequencer.h">
       <Filter>PolyBox\Source</Filter>
     </ClInclude>

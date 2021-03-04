@@ -2,15 +2,22 @@
 
 #include <JuceHeader.h>
 #include "SequencerVoice.h"
+#include "Math.h"
 
 #define NUM_VOICES 6
 
+struct Fraction {
+	int a;
+	int b;
+};
+
 class PolySequencer : juce::HighResolutionTimer
 {
+
 public:
 	SequencerVoice *voices[NUM_VOICES];
 
-	PolySequencer();
+	PolySequencer(int tempo, int duration, Fraction *timeSignature);
 
 	void hiResTimerCallback() override;
 
@@ -20,10 +27,24 @@ public:
 
 	int getSteps();
 	int getPosition();
+	int getTempo();
+	int getDuration();
+	float getTimeSignature();
+	bool isPlaying();
+
+	void setTempo(int tempo);
+	void setDuration(int duration);
+	void setTimeSignature(int a, int b);
 
 private:
 	int steps;
 	int position;
+	int tempo;
+	int duration;
+	Fraction *timeSignature;
+	bool playing;
 
-	void calculateSteps();
+	int calculateSteps();
+	int getInterval();
+	bool shouldPlay(SequencerVoice *v);
 };
