@@ -79,7 +79,8 @@ void PolySequencer::hiResTimerCallback()
 	for (int i = 0; i < NUM_VOICES; i++)
 	{
 		if (shouldPlay(voices[i]))
-			voices[i]->step();
+			auto message = voices[i]->step();
+		//post to buffer
 	}
 
 	if (++position == steps)

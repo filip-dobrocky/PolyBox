@@ -11,11 +11,14 @@ struct Fraction {
 	int b;
 };
 
-class PolySequencer : juce::HighResolutionTimer
+using namespace juce;
+
+class PolySequencer : HighResolutionTimer
 {
 
 public:
 	SequencerVoice *voices[NUM_VOICES];
+	MidiBuffer midiMessages;
 
 	PolySequencer(int tempo, int duration, Fraction *timeSignature);
 

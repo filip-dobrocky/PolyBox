@@ -10,13 +10,15 @@ struct Note {
 	double probability;
 };
 
+using namespace juce;
+
 class SequencerVoice {
 
 private:
 	int length;
 	int position;
 
-	juce::Random *random;
+	Random *random;
 
 	bool chance(double probability);
 
@@ -30,5 +32,5 @@ public:
 
 	void insertNote(int index, Note note);
 	void removeNote(int index);
-	void step();
+	MidiMessage step();
 };

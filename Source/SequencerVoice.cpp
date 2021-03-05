@@ -6,7 +6,7 @@ SequencerVoice::SequencerVoice(int length)
 {
 	this->length = length;
 	this->position = 0;
-	sequence.reserve(length);
+	sequence.reserve(length); // initialize? / define empty note 
 	random = new Random(Time::currentTimeMillis());
 }
 
@@ -40,17 +40,23 @@ void SequencerVoice::removeNote(int position)
 		sequence.erase(sequence.begin() + position);
 }
 
-void SequencerVoice::step()
+MidiMessage SequencerVoice::step()
 {
 	Note note = sequence[position];
 
-	if (chance(note.probability))
-	{
-		// create midi note
-	}
+	//TODO: null check
+	//if (note)
+	//{
+		if (chance(note.probability))
+		{
+			// create midi note
+		}
+	//}
 
 	if (++position == length)
 		position = 0;
+
+	//return midi note
 }
 
 bool SequencerVoice::chance(double probability)
