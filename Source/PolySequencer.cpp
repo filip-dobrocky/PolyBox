@@ -1,13 +1,14 @@
 #include "PolySequencer.h"
 
-PolySequencer::PolySequencer(int tempo, int duration, Fraction* timeSignature)
+PolySequencer::PolySequencer(int tempo, int duration, Fraction timeSignature, int sampleRate)
 {
 	for (int i = 0; i < NUM_VOICES; i++)
-		voices[i] = new SequencerVoice(DEFAULT_STEPS);
+		voices[i] = new SequencerVoice(i, DEFAULT_STEPS);
 	
 	this->tempo = tempo;
 	this->duration = duration;
 	this->timeSignature = timeSignature;
+	this->sampleRate = sampleRate;
 }
 
 int PolySequencer::getSteps() { return steps; }
@@ -18,9 +19,9 @@ int PolySequencer::getTempo() { return tempo; }
 
 int PolySequencer::getDuration() { return duration; }
 
-bool PolySequencer::isPlaying() { return playing };
+bool PolySequencer::isPlaying() { return playing; };
 
-float PolySequencer::getTimeSignature() { return (float)timeSignature->a / timeSignature->b; }
+float PolySequencer::getTimeSignature() { return (float)timeSignature.a / timeSignature.b; }
 
 void PolySequencer::setTempo(int tempo) 
 {
@@ -34,13 +35,18 @@ void PolySequencer::setDuration(int duration)
 
 void PolySequencer::setTimeSignature(int a, int b)
 {
-	timeSignature->a = a;
-	timeSignature->b = b;
+	timeSignature.a = a;
+	timeSignature.b = b;
 }
 
 int PolySequencer::getInterval()
 {
-	return (240000 / steps) * tempo * duration * timeSignature->a / timeSignature->b;
+	return (240000 / steps) * tempo * duration * timeSignature.a / timeSignature.b;
+}
+
+void PolySequencer::setSampleRate(int sampleRate)
+{
+	this->sampleRate = sampleRate;
 }
 
 bool PolySequencer::shouldPlay(SequencerVoice* v)
@@ -58,6 +64,7 @@ int PolySequencer::calculateSteps()
 
 void PolySequencer::play()
 {
+	startTime = Time::getMillisecondCounterHiRes() * 0.001;
 	steps = calculateSteps();
 	startTimer(getInterval());
 	playing = true;
@@ -76,11 +83,15 @@ void PolySequencer::reset()
 
 void PolySequencer::hiResTimerCallback()
 {
+	int sample = static_cast<int>(Time::getMillisecondCounterHiRes() * 0.001 - startTime) * sampleRate;
+
 	for (int i = 0; i < NUM_VOICES; i++)
 	{
 		if (shouldPlay(voices[i]))
-			auto message = voices[i]->step();
-		//post to buffer
+		{
+			auto buffer = voices[i]->step(sample);
+			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
+		}
 	}
 
 	if (++position == steps)

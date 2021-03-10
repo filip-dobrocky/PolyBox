@@ -20,7 +20,7 @@ public:
 	SequencerVoice *voices[NUM_VOICES];
 	MidiBuffer midiMessages;
 
-	PolySequencer(int tempo, int duration, Fraction *timeSignature);
+	PolySequencer(int tempo, int duration, Fraction timeSignature, int sampleRate);
 
 	void hiResTimerCallback() override;
 
@@ -38,14 +38,17 @@ public:
 	void setTempo(int tempo);
 	void setDuration(int duration);
 	void setTimeSignature(int a, int b);
+	void setSampleRate(int sampleRate);
 
 private:
 	int steps;
 	int position;
 	int tempo;
 	int duration;
-	Fraction *timeSignature;
+	int sampleRate;
+	Fraction timeSignature;
 	bool playing;
+	double startTime;
 
 	int calculateSteps();
 	int getInterval();

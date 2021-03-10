@@ -2,11 +2,18 @@
 
 using namespace juce;
 
-SequencerVoice::SequencerVoice(int length)
+SequencerVoice::SequencerVoice(int index, int length)
 {
 	this->length = length;
 	this->position = 0;
-	sequence.reserve(length); // initialize? / define empty note 
+
+	sequence.reserve(length);
+	for (int i = 0; i < length; i++)
+		sequence[i] = nullptr;
+
+	for (int i = 0; i < NUM_VOICES; i++)
+		channels[i] = false;
+	
 	random = new Random(Time::currentTimeMillis());
 }
 
@@ -26,13 +33,30 @@ int SequencerVoice::getPosition()
 	return position;
 }
 
-void SequencerVoice::insertNote(int position, Note note)
+void SequencerVoice::insertNote(int position, int noteNumber, float velocity, double probability)
 {
 	if (position < length)
-		sequence[position] = note;
+		sequence[position] = new Note{noteNumber, velocity, probability};
 	else
 		throw "Index out of bounds";
 }
+
+void SequencerVoice::assignChannel(int channel)
+{
+	if (channel < NUM_VOICES && channel >= 0)
+		channels[channel] = true;
+	else
+		throw "Channel out of bounds";
+}
+
+void SequencerVoice::deassignChannel(int channel)
+{
+	if (channel < NUM_VOICES && channel >= 0)
+		channels[channel] = false;
+	else
+		throw "Channel out of bounds";
+}
+
 
 void SequencerVoice::removeNote(int position)
 {
@@ -40,23 +64,25 @@ void SequencerVoice::removeNote(int position)
 		sequence.erase(sequence.begin() + position);
 }
 
-MidiMessage SequencerVoice::step()
+MidiBuffer SequencerVoice::step(int sample)
 {
-	Note note = sequence[position];
+	Note *note = sequence[position];
+	MidiBuffer buffer;
 
-	//TODO: null check
-	//if (note)
-	//{
-		if (chance(note.probability))
+	if (note)
+	{
+		if (chance(note->probability))
 		{
-			// create midi note
+			for (int i = 0; i < NUM_VOICES; i++)
+				if (channels[i])
+					buffer.addEvent(MidiMessage::noteOn(i, note->number, note->velocity), sample);
 		}
-	//}
+	}
 
 	if (++position == length)
 		position = 0;
 
-	//return midi note
+	return buffer;
 }
 
 bool SequencerVoice::chance(double probability)
