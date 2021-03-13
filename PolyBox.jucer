@@ -5,6 +5,14 @@
               pluginCharacteristicsValue="pluginIsSynth,pluginWantsMidiIn">
   <MAINGROUP id="jRql7p" name="PolyBox">
     <GROUP id="{2D0F0B3F-8B7D-E054-09F8-0D254D316DFE}" name="Source">
+      <GROUP id="{036A4BC2-D9B4-688C-8BA3-CA814C7525C2}" name="GUI">
+        <FILE id="iMEjVl" name="SequencerGrid.cpp" compile="1" resource="0"
+              file="Source/SequencerGrid.cpp"/>
+        <FILE id="zrep2F" name="SequencerGrid.h" compile="0" resource="0" file="Source/SequencerGrid.h"/>
+        <FILE id="mwt86Q" name="SequencerStep.cpp" compile="1" resource="0"
+              file="Source/SequencerStep.cpp"/>
+        <FILE id="tf3SV1" name="SequencerStep.h" compile="0" resource="0" file="Source/SequencerStep.h"/>
+      </GROUP>
       <FILE id="tjLFsi" name="Math.cpp" compile="1" resource="0" file="Source/Math.cpp"/>
       <FILE id="I5vER2" name="Math.h" compile="0" resource="0" file="Source/Math.h"/>
       <FILE id="T891VQ" name="SequencerVoice.cpp" compile="1" resource="0"

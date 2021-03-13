@@ -1,7 +1,7 @@
 #pragma once
+#include "PolySequencer.h"
 #include <vector>
 #include <JuceHeader.h>
-#include "PolySequencer.h"
 
 #define DEFAULT_STEPS 8
 

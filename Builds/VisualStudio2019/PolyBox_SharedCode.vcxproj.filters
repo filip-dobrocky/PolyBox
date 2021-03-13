@@ -2,6 +2,9 @@
 
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="PolyBox\Source\GUI">
+      <UniqueIdentifier>{04D32890-42C9-07B3-AB10-25DD356C7DD3}</UniqueIdentifier>
+    </Filter>
     <Filter Include="PolyBox\Source">
       <UniqueIdentifier>{0DB2B4F9-1DE1-86F8-C565-620C1A84D7D0}</UniqueIdentifier>
     </Filter>
@@ -430,6 +433,12 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Source\SequencerGrid.cpp">
+      <Filter>PolyBox\Source\GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Source\SequencerStep.cpp">
+      <Filter>PolyBox\Source\GUI</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\Source\Math.cpp">
       <Filter>PolyBox\Source</Filter>
     </ClCompile>
@@ -2499,6 +2508,12 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\SequencerGrid.h">
+      <Filter>PolyBox\Source\GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\Source\SequencerStep.h">
+      <Filter>PolyBox\Source\GUI</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Math.h">
       <Filter>PolyBox\Source</Filter>
     </ClInclude>
