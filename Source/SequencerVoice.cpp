@@ -9,12 +9,12 @@ SequencerVoice::SequencerVoice(int index, int length)
 
 	sequence.reserve(length);
 	for (int i = 0; i < length; i++)
-		sequence[i] = nullptr;
+		sequence.push_back(nullptr);
 
 	for (int i = 0; i < NUM_VOICES; i++)
 		channels[i] = false;
 	
-	random = new Random(Time::currentTimeMillis());
+	random.setSeed(Time::currentTimeMillis());
 }
 
 int SequencerVoice::getLength()
@@ -61,7 +61,10 @@ void SequencerVoice::deassignChannel(int channel)
 void SequencerVoice::removeNote(int position)
 {
 	if (position < length)
+	{
+		delete sequence[position];
 		sequence.erase(sequence.begin() + position);
+	}
 }
 
 MidiBuffer SequencerVoice::step(int sample)
@@ -87,6 +90,6 @@ MidiBuffer SequencerVoice::step(int sample)
 
 bool SequencerVoice::chance(double probability)
 {
-	return random->nextDouble() >= probability;
+	return random.nextDouble() >= probability;
 }
 

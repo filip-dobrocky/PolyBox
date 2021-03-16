@@ -16,6 +16,7 @@ SequencerGrid::SequencerGrid(PolySequencer *sequencer)
 
 SequencerGrid::~SequencerGrid()
 {
+
 }
 
 void SequencerGrid::paint (juce::Graphics& g)

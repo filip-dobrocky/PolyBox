@@ -13,16 +13,20 @@
 PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
-    mLoadSampleButton.onClick = [&] { audioProcessor.loadSample(); };
+    /*mLoadSampleButton.onClick = [&] { audioProcessor.loadSample(); };
     mLoadTuningButton.onClick = [&] { audioProcessor.loadTuning(); };
     addAndMakeVisible(mLoadSampleButton);
-    addAndMakeVisible(mLoadTuningButton);
+    addAndMakeVisible(mLoadTuningButton);*/
 
-    setSize (200, 200);
+    mSequencerGrid = new SequencerGrid(audioProcessor.getSequencerPtr());
+    addAndMakeVisible(mSequencerGrid);
+
+    setSize (1000, 500);
 }
 
 PolyBoxAudioProcessorEditor::~PolyBoxAudioProcessorEditor()
 {
+    delete mSequencerGrid;
 }
 
 //==============================================================================

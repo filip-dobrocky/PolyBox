@@ -1,17 +1,15 @@
 #pragma once
-#include "PolySequencer.h"
 #include <vector>
 #include <JuceHeader.h>
 
 #define DEFAULT_STEPS 8
+#define NUM_VOICES 6
 
 struct Note {
 	int number;
 	float velocity;
 	double probability;
 };
-
-using namespace juce;
 
 class SequencerVoice {
 
@@ -21,7 +19,7 @@ private:
 	int position;
 	bool channels[NUM_VOICES];
 
-	Random *random;
+	Random random;
 
 	bool chance(double probability);
 

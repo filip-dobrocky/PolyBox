@@ -4,8 +4,6 @@
 #include "SequencerVoice.h"
 #include "Math.h"
 
-#define NUM_VOICES 6
-
 struct Fraction {
 	int a;
 	int b;
@@ -17,10 +15,11 @@ class PolySequencer : HighResolutionTimer
 {
 
 public:
-	SequencerVoice *voices[NUM_VOICES];
-	MidiBuffer midiMessages;
-
 	PolySequencer(int tempo, int duration, Fraction timeSignature, int sampleRate);
+	~PolySequencer();
+
+	SequencerVoice* voices[6];
+	MidiBuffer midiMessages;
 
 	void hiResTimerCallback() override;
 
@@ -52,5 +51,5 @@ private:
 
 	int calculateSteps();
 	int getInterval();
-	bool shouldPlay(SequencerVoice *v);
+	bool shouldPlay(SequencerVoice* v);
 };

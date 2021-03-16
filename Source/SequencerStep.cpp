@@ -33,9 +33,9 @@ void SequencerStep::paint (juce::Graphics& g)
 {
     
 
-    g.fillAll (Colour(active ? StepColour::active : StepColour::inactive));   // clear the background
+    g.fillAll (Colour(active ? StepColour::cActive : StepColour::cInactive));   // clear the background
 
-    g.setColour (Colour(selected ? StepColour::selected : StepColour::border));
+    g.setColour (Colour(selected ? StepColour::cSelected : StepColour::cBorder));
     g.drawRect (getLocalBounds(), 1);
 
     if (!rest)

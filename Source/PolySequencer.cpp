@@ -11,6 +11,12 @@ PolySequencer::PolySequencer(int tempo, int duration, Fraction timeSignature, in
 	this->sampleRate = sampleRate;
 }
 
+PolySequencer::~PolySequencer()
+{
+	for (int i = 0; i < NUM_VOICES; i++)
+		delete voices[i];
+}
+
 int PolySequencer::getSteps() { return steps; }
 
 int PolySequencer::getPosition() { return position; }

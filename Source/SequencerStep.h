@@ -38,10 +38,10 @@ public:
 
     enum StepColour
     {
-        inactive = 0xff696969,
-        active = 0xffadd8e6,
-        border = 0xfffffff0,
-        selected = 0xfff5f5f5
+        cInactive = 0xff696969,
+        cActive = 0xffadd8e6,
+        cBorder = 0xfffffff0,
+        cSelected = 0xfff5f5f5
     };
 
 private:

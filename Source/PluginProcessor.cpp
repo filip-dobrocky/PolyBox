@@ -23,11 +23,13 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
 #endif
 {
     mFormatManager.registerBasicFormats();
+    mSequencer = new PolySequencer(120, 1, Fraction{ 4, 4 }, getSampleRate());
 }
 
 PolyBoxAudioProcessor::~PolyBoxAudioProcessor()
 {
     delete mFormatReader;
+    delete mSequencer;
     mTuning = nullptr;
 }
 
@@ -87,6 +89,11 @@ void PolyBoxAudioProcessor::setCurrentProgram (int index)
 const juce::String PolyBoxAudioProcessor::getProgramName (int index)
 {
     return {};
+}
+
+PolySequencer* PolyBoxAudioProcessor::getSequencerPtr()
+{
+    return mSequencer;
 }
 
 void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& newName)
