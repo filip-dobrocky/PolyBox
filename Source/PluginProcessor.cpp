@@ -10,7 +10,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-SamplerTestAudioProcessor::SamplerTestAudioProcessor()
+PolyBoxAudioProcessor::PolyBoxAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -25,19 +25,19 @@ SamplerTestAudioProcessor::SamplerTestAudioProcessor()
     mFormatManager.registerBasicFormats();
 }
 
-SamplerTestAudioProcessor::~SamplerTestAudioProcessor()
+PolyBoxAudioProcessor::~PolyBoxAudioProcessor()
 {
     delete mFormatReader;
     mTuning = nullptr;
 }
 
 //==============================================================================
-const juce::String SamplerTestAudioProcessor::getName() const
+const juce::String PolyBoxAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool SamplerTestAudioProcessor::acceptsMidi() const
+bool PolyBoxAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -46,7 +46,7 @@ bool SamplerTestAudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool SamplerTestAudioProcessor::producesMidi() const
+bool PolyBoxAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -55,7 +55,7 @@ bool SamplerTestAudioProcessor::producesMidi() const
    #endif
 }
 
-bool SamplerTestAudioProcessor::isMidiEffect() const
+bool PolyBoxAudioProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -64,49 +64,49 @@ bool SamplerTestAudioProcessor::isMidiEffect() const
    #endif
 }
 
-double SamplerTestAudioProcessor::getTailLengthSeconds() const
+double PolyBoxAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int SamplerTestAudioProcessor::getNumPrograms()
+int PolyBoxAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int SamplerTestAudioProcessor::getCurrentProgram()
+int PolyBoxAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void SamplerTestAudioProcessor::setCurrentProgram (int index)
+void PolyBoxAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const juce::String SamplerTestAudioProcessor::getProgramName (int index)
+const juce::String PolyBoxAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void SamplerTestAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
 
 //==============================================================================
-void SamplerTestAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void PolyBoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     mSampler.setCurrentPlaybackSampleRate(sampleRate);
 }
 
-void SamplerTestAudioProcessor::releaseResources()
+void PolyBoxAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool SamplerTestAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool PolyBoxAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     juce::ignoreUnused (layouts);
@@ -129,7 +129,7 @@ bool SamplerTestAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 }
 #endif
 
-void SamplerTestAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -148,31 +148,31 @@ void SamplerTestAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, 
 }
 
 //==============================================================================
-bool SamplerTestAudioProcessor::hasEditor() const
+bool PolyBoxAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* SamplerTestAudioProcessor::createEditor()
+juce::AudioProcessorEditor* PolyBoxAudioProcessor::createEditor()
 {
-    return new SamplerTestAudioProcessorEditor (*this);
+    return new PolyBoxAudioProcessorEditor (*this);
 }
 
 //==============================================================================
-void SamplerTestAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void PolyBoxAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void SamplerTestAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void PolyBoxAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
 
-void SamplerTestAudioProcessor::loadSample()
+void PolyBoxAudioProcessor::loadSample()
 {
     FileChooser chooser { "Load sample", File::getSpecialLocation(File::userDesktopDirectory), "*.wav; *.mp3" };
     if (chooser.browseForFileToOpen())
@@ -186,7 +186,7 @@ void SamplerTestAudioProcessor::loadSample()
     }
 }
 
-void SamplerTestAudioProcessor::loadTuning()
+void PolyBoxAudioProcessor::loadTuning()
 {
     using namespace Tunings;
     FileChooser sclChooser{ "Load .scl", File::getSpecialLocation(File::userDesktopDirectory), "*.scl" };
@@ -214,5 +214,5 @@ void SamplerTestAudioProcessor::loadTuning()
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new SamplerTestAudioProcessor();
+    return new PolyBoxAudioProcessor();
 }

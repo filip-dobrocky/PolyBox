@@ -17,12 +17,12 @@ using namespace juce;
 //==============================================================================
 /**
 */
-class SamplerTestAudioProcessor  : public juce::AudioProcessor
+class PolyBoxAudioProcessor  : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    SamplerTestAudioProcessor();
-    ~SamplerTestAudioProcessor() override;
+    PolyBoxAudioProcessor();
+    ~PolyBoxAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -69,5 +69,5 @@ private:
     Tunings::Tuning* mTuning{ nullptr };
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SamplerTestAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PolyBoxAudioProcessor)
 };

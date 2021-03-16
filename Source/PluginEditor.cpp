@@ -10,7 +10,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-SamplerTestAudioProcessorEditor::SamplerTestAudioProcessorEditor (SamplerTestAudioProcessor& p)
+PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     mLoadSampleButton.onClick = [&] { audioProcessor.loadSample(); };
@@ -21,12 +21,12 @@ SamplerTestAudioProcessorEditor::SamplerTestAudioProcessorEditor (SamplerTestAud
     setSize (200, 200);
 }
 
-SamplerTestAudioProcessorEditor::~SamplerTestAudioProcessorEditor()
+PolyBoxAudioProcessorEditor::~PolyBoxAudioProcessorEditor()
 {
 }
 
 //==============================================================================
-void SamplerTestAudioProcessorEditor::paint (juce::Graphics& g)
+void PolyBoxAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
@@ -35,7 +35,7 @@ void SamplerTestAudioProcessorEditor::paint (juce::Graphics& g)
     g.setFont (15.0f);
 }
 
-void SamplerTestAudioProcessorEditor::resized()
+void PolyBoxAudioProcessorEditor::resized()
 {
     mLoadSampleButton.setBounds(getWidth() / 2 - 50, getHeight() / 4 - 50, 100, 50);
     mLoadTuningButton.setBounds(getWidth() / 2 - 50, 3 * getHeight() / 4 - 25, 100, 50);
