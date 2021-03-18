@@ -20,16 +20,16 @@
 class SequencerStep  : public juce::Component
 {
 public:
-    SequencerStep(Note note);
-    SequencerStep();
+    SequencerStep(Note* note);
     ~SequencerStep() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
+    void mouseDown(const MouseEvent& event) override;
     
     void erase();
 
-    void setNote(Note note);
+    void setNote(Note* note);
     void setActive(bool active);
     void setSelected(bool selected);
 
@@ -41,15 +41,30 @@ public:
         cInactive = 0xff696969,
         cActive = 0xffadd8e6,
         cBorder = 0xfffffff0,
-        cSelected = 0xfff5f5f5
+        cSelected = 0xffff0000
     };
 
+    class JUCE_API  Listener
+    {
+    public:
+        virtual ~Listener() = default;
+
+        virtual void stepSelected(SequencerStep* selectedStep) = 0;
+    };
+
+    void addListener(Listener* listener);
+
+    void removeListener(Listener* listener);
+
+
 private:
-    Note note;
+    Note* note;
 
     bool active;
     bool selected;
-    bool rest;
+
+    ListenerList<Listener> listeners;
+    void callStepSelectedListeners();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SequencerStep)
 };

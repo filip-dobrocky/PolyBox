@@ -3,41 +3,61 @@
 
 using namespace juce;
 //==============================================================================
-SequencerGrid::SequencerGrid(PolySequencer *sequencer)
+SequencerGrid::SequencerGrid(PolySequencer* sequencer)
 {
     for (int i = 0; i < NUM_VOICES; i++)
     {
-        for (auto note : sequencer->voices[i]->sequence)
-        {
-            addAndMakeVisible(steps[i].add(note ? new SequencerStep(*note) : new SequencerStep()));
-        }
+        addAndMakeVisible(rows[i] = new SequencerRow(sequencer->voices[i]));
     }
 }
 
 SequencerGrid::~SequencerGrid()
 {
-
+    for (int i = 0; i < NUM_VOICES; i++)
+    {
+        delete rows[i];
+    }
 }
 
 void SequencerGrid::paint (juce::Graphics& g)
 {
-    
+    //g.fillAll(Colours::aquamarine);
 }
 
 void SequencerGrid::resized()
 {
-    FlexBox fbRows;
-    fbRows.flexDirection = FlexBox::Direction::column;
+    FlexBox fb;
+    fb.flexDirection = FlexBox::Direction::column;
     
     for (int i = 0; i < NUM_VOICES; i++)
     {
-        FlexBox fbVoice;
-        for (auto step : steps[i])
-        {
-            fbVoice.items.add(FlexItem(*step)); // withFlex?
-        }
-        fbRows.items.add(FlexItem(fbVoice).withMinHeight(50.0f));
-        fbVoice.performLayout(getLocalBounds().toFloat());
+        fb.items.add(FlexItem(*rows[i]).withMinHeight(50.0f).withFlex(1));
     }
-    fbRows.performLayout(getLocalBounds().toFloat());
+    fb.performLayout(getLocalBounds().toFloat());
+}
+
+SequencerRow::SequencerRow(SequencerVoice* voice)
+{
+    this->voice = voice;
+    for (auto step : voice->sequence)
+        addAndMakeVisible(steps.add(new SequencerStep(step)));
+}
+
+SequencerRow::~SequencerRow()
+{
+}
+
+void SequencerRow::paint(juce::Graphics& g)
+{
+    //g.fillAll(Colours::aquamarine);
+}
+
+void SequencerRow::resized()
+{
+    FlexBox fb;
+    for (auto step : steps)
+    {
+        fb.items.add(FlexItem(*step).withFlex(1)); // withFlex?
+    }
+    fb.performLayout(getLocalBounds().toFloat());
 }

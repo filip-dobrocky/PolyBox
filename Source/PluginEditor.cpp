@@ -41,6 +41,8 @@ void PolyBoxAudioProcessorEditor::paint (juce::Graphics& g)
 
 void PolyBoxAudioProcessorEditor::resized()
 {
-    mLoadSampleButton.setBounds(getWidth() / 2 - 50, getHeight() / 4 - 50, 100, 50);
-    mLoadTuningButton.setBounds(getWidth() / 2 - 50, 3 * getHeight() / 4 - 25, 100, 50);
+    //mLoadSampleButton.setBounds(getWidth() / 2 - 50, getHeight() / 4 - 50, 100, 50);
+    //mLoadTuningButton.setBounds(getWidth() / 2 - 50, 3 * getHeight() / 4 - 25, 100, 50);
+
+    mSequencerGrid->setBounds(getLocalBounds());
 }

@@ -50,7 +50,7 @@
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(LibraryPath);$(SolutionDir)$(Platform)\$(Configuration)\Shared Code</LibraryPath>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Platform)\$(Configuration)\Standalone Plugin\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\Standalone Plugin\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">SamplerTest</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">PolyBox</TargetName>
     <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
     <LibraryPath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(LibraryPath);$(SolutionDir)$(Platform)\$(Configuration)\Shared Code</LibraryPath>
   </PropertyGroup>
@@ -126,24 +126,24 @@
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ResourceCompile>
     <Link>
-      <OutputFile>$(OutDir)\SamplerTest.exe</OutputFile>
+      <OutputFile>$(OutDir)\PolyBox.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>false</GenerateDebugInformation>
-      <ProgramDatabaseFile>$(IntDir)\SamplerTest.pdb</ProgramDatabaseFile>
+      <ProgramDatabaseFile>$(IntDir)\PolyBox.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <LargeAddressAware>true</LargeAddressAware>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
-      <AdditionalDependencies>SamplerTest.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PolyBox.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(IntDir)\SamplerTest.bsc</OutputFile>
+      <OutputFile>$(IntDir)\PolyBox.bsc</OutputFile>
     </Bscmake>
     <Lib>
-      <AdditionalDependencies>SamplerTest.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>PolyBox.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>

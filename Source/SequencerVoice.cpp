@@ -36,7 +36,11 @@ int SequencerVoice::getPosition()
 void SequencerVoice::insertNote(int position, int noteNumber, float velocity, double probability)
 {
 	if (position < length)
-		sequence[position] = new Note{noteNumber, velocity, probability};
+	{
+		if (sequence[position])
+			delete sequence[position];
+		sequence[position] = new Note{ noteNumber, velocity, probability };
+	}
 	else
 		throw "Index out of bounds";
 }
