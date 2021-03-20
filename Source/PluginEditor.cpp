@@ -21,7 +21,7 @@ PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor&
     mSequencerGrid = new SequencerGrid(audioProcessor.getSequencerPtr());
     addAndMakeVisible(mSequencerGrid);
 
-    setSize (1000, 500);
+    setSize (1000, 400);
 }
 
 PolyBoxAudioProcessorEditor::~PolyBoxAudioProcessorEditor()

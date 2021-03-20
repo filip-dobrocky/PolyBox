@@ -4,12 +4,11 @@ using namespace juce;
 
 SequencerVoice::SequencerVoice(int index, int length)
 {
-	this->length = length;
 	this->position = 0;
 
-	sequence.reserve(length);
+	sequence.ensureStorageAllocated(length);
 	for (int i = 0; i < length; i++)
-		sequence.push_back(nullptr);
+		sequence.add(new Note());
 
 	for (int i = 0; i < NUM_VOICES; i++)
 		channels[i] = false;
@@ -17,32 +16,37 @@ SequencerVoice::SequencerVoice(int index, int length)
 	random.setSeed(Time::currentTimeMillis());
 }
 
-int SequencerVoice::getLength()
+SequencerVoice::~SequencerVoice()
 {
-	return length;
+	sequence.clear();
 }
 
-void SequencerVoice::setLength(int length)
+int SequencerVoice::getLength()
 {
-	this->length = length;
-	sequence.resize(length);
+	return sequence.size();
 }
+
+/*void SequencerVoice::setLength(int length)
+{
+	sequence.resize(length);
+}*/
 
 int SequencerVoice::getPosition()
 {
 	return position;
 }
 
-void SequencerVoice::insertNote(int position, int noteNumber, float velocity, double probability)
+Note* SequencerVoice::getNotePtr(int index)
 {
-	if (position < length)
-	{
-		if (sequence[position])
-			delete sequence[position];
-		sequence[position] = new Note{ noteNumber, velocity, probability };
-	}
+	if (index < sequence.size() && index >= 0)
+		return sequence[index];
 	else
 		throw "Index out of bounds";
+}
+
+Note* SequencerVoice::getLastNotePtr()
+{
+	return sequence.getLast();
 }
 
 void SequencerVoice::assignChannel(int channel)
@@ -62,21 +66,31 @@ void SequencerVoice::deassignChannel(int channel)
 }
 
 
-void SequencerVoice::removeNote(int position)
+void SequencerVoice::eraseNote(int position)
 {
-	if (position < length)
+	if (position < sequence.size())
 	{
-		delete sequence[position];
-		sequence.erase(sequence.begin() + position);
+		auto note = sequence[position];
+		note->number = -1;
 	}
+}
+
+void SequencerVoice::grow()
+{
+	sequence.add(new Note());
+}
+
+void SequencerVoice::shrink()
+{
+	sequence.removeLast();
 }
 
 MidiBuffer SequencerVoice::step(int sample)
 {
-	Note *note = sequence[position];
+	auto note = sequence[position];
 	MidiBuffer buffer;
 
-	if (note)
+	if (note->number != -1)
 	{
 		if (chance(note->probability))
 		{
@@ -86,7 +100,7 @@ MidiBuffer SequencerVoice::step(int sample)
 		}
 	}
 
-	if (++position == length)
+	if (++position == sequence.size())
 		position = 0;
 
 	return buffer;

@@ -49,7 +49,7 @@ public:
     public:
         virtual ~Listener() = default;
 
-        virtual void stepSelected(SequencerStep* selectedStep) = 0;
+        virtual void stepSelected(SequencerStep* step) = 0;
     };
 
     void addListener(Listener* listener);

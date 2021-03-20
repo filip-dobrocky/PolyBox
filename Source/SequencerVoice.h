@@ -9,31 +9,37 @@ struct Note {
 	int number;
 	float velocity;
 	double probability;
+
+	Note::Note() : number(-1), velocity (0.5f), probability(1) {}
+	Note::Note(int num, float vel, double prob) : number(num), velocity(vel), probability(prob) {}
 };
 
 class SequencerVoice {
 
 private:
 	int index;
-	int length;
 	int position;
 	bool channels[NUM_VOICES];
 
+	OwnedArray<Note> sequence;
 	Random random;
 
 	bool chance(double probability);
 
 public:
 	SequencerVoice(int index, int length);
+	~SequencerVoice();
 
-	std::vector<Note*> sequence;
 	int getPosition();
 	int getLength();
-	void setLength(int length);
+	Note* getNotePtr(int index);
+	Note* getLastNotePtr();
+	//void setLength(int length);
 
 	void assignChannel(int channel);
 	void deassignChannel(int channel);
-	void insertNote(int index, int noteNumber, float velocity, double probability);
-	void removeNote(int index);
+	void eraseNote(int index);
+	void grow();
+	void shrink();
 	MidiBuffer step(int sample);
 };

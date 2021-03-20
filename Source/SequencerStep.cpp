@@ -14,9 +14,8 @@
 using namespace juce;
 
 //==============================================================================
-SequencerStep::SequencerStep(Note* note)
+SequencerStep::SequencerStep(Note* n) : note(n)
 {
-    this->note = note;
     selected = active = false;
 }
 
@@ -34,7 +33,7 @@ void SequencerStep::paint (juce::Graphics& g)
     g.setColour (Colour(selected ? StepColour::cSelected : StepColour::cBorder));
     g.drawRect (getLocalBounds(), 2);
 
-    if (note)
+    if (note->number != -1)
     {
         float velocityLineH = note->velocity * getHeight();
         g.setColour(juce::Colours::lightslategrey);
@@ -64,22 +63,20 @@ void SequencerStep::setNote(Note* note)
 
 void SequencerStep::erase()
 {
-    delete note;
-    note = nullptr;
+    note->number = -1;
 }
 
 void SequencerStep::mouseDown(const MouseEvent& event)
 {
     if (event.mouseWasClicked() && event.mods.isLeftButtonDown())
-        setSelected(true);
+        callStepSelectedListeners();
 }
 
 void SequencerStep::setActive(bool active) { this->active = active; }
 
 void SequencerStep::setSelected(bool selected)
 { 
-    if (this->selected = selected)
-        callStepSelectedListeners();
+    this->selected = selected;
     repaint();
 }
 

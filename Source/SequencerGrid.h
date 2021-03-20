@@ -18,34 +18,47 @@
 /*
 */
 
-class SequencerRow : public Component
+class SequencerGrid : public juce::Component,
+                      public SequencerStep::Listener
 {
-public:
-    SequencerRow(SequencerVoice* voice);
-    ~SequencerRow() override;
 
-    void paint(juce::Graphics&) override;
-    void resized() override;
+    class SequencerRow : public Component
+    {
+    public:
+        SequencerRow(SequencerVoice* voice, SequencerGrid* grid);
+        ~SequencerRow() override;
 
-private:
-    SequencerVoice* voice;
-    juce::OwnedArray<SequencerStep> steps;
+        void paint(juce::Graphics&) override;
+        void resized() override;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SequencerRow)
-};
+    private:
+        SequencerVoice* voice;
+        SequencerGrid* grid;
 
-class SequencerGrid  : public juce::Component
-{
+        TextButton plusButton{ "+" };
+        TextButton minusButton{ "-" };
+
+        juce::OwnedArray<SequencerStep> steps;
+
+        void addStep();
+        void removeStep();
+
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SequencerRow)
+    };
+
 public:
     SequencerGrid(PolySequencer* sequencer);
     ~SequencerGrid() override;
 
-    void paint (juce::Graphics&) override;
+    void paint(juce::Graphics&) override;
     void resized() override;
+
+    void stepSelected(SequencerStep* step) override;
 
 private:
     PolySequencer* sequencer;
     SequencerRow* rows[NUM_VOICES];
+    SequencerStep* selectedStep{ nullptr };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SequencerGrid)
 };
