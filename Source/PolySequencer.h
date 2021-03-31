@@ -46,10 +46,11 @@ private:
 	int duration;
 	int sampleRate;
 	Fraction timeSignature;
-	bool playing;
 	double startTime;
+	bool playing;
 
 	int calculateSteps();
 	int getInterval();
+	void lengthChanged();
 	bool shouldPlay(SequencerVoice* v);
 };

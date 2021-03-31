@@ -29,7 +29,14 @@ public:
     
     void erase();
 
-    void setNote(Note* note);
+    void setNoteNumber(int number);
+    void setVelocity(float velocity);
+    void setProbability(double probability);
+
+    int getNoteNumber();
+    float getVelocity();
+    double getProbability();
+    
     void setActive(bool active);
     void setSelected(bool selected);
 

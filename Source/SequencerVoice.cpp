@@ -4,7 +4,8 @@ using namespace juce;
 
 SequencerVoice::SequencerVoice(int index, int length)
 {
-	this->position = 0;
+	position = 0;
+	this->index = index;
 
 	sequence.ensureStorageAllocated(length);
 	for (int i = 0; i < length; i++)
@@ -34,6 +35,11 @@ int SequencerVoice::getLength()
 int SequencerVoice::getPosition()
 {
 	return position;
+}
+
+void SequencerVoice::setPosition(int position)
+{
+	this->position = position;
 }
 
 Note* SequencerVoice::getNotePtr(int index)
@@ -78,11 +84,13 @@ void SequencerVoice::eraseNote(int position)
 void SequencerVoice::grow()
 {
 	sequence.add(new Note());
+	onLengthChange();
 }
 
 void SequencerVoice::shrink()
 {
 	sequence.removeLast();
+	onLengthChange();
 }
 
 MidiBuffer SequencerVoice::step(int sample)
@@ -99,6 +107,8 @@ MidiBuffer SequencerVoice::step(int sample)
 					buffer.addEvent(MidiMessage::noteOn(i, note->number, note->velocity), sample);
 		}
 	}
+
+	onStep();
 
 	if (++position == sequence.size())
 		position = 0;

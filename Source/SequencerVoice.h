@@ -16,21 +16,12 @@ struct Note {
 
 class SequencerVoice {
 
-private:
-	int index;
-	int position;
-	bool channels[NUM_VOICES];
-
-	OwnedArray<Note> sequence;
-	Random random;
-
-	bool chance(double probability);
-
 public:
 	SequencerVoice(int index, int length);
 	~SequencerVoice();
 
 	int getPosition();
+	void setPosition(int position);
 	int getLength();
 	Note* getNotePtr(int index);
 	Note* getLastNotePtr();
@@ -42,4 +33,17 @@ public:
 	void grow();
 	void shrink();
 	MidiBuffer step(int sample);
+
+	std::function<void()> onStep;
+	std::function<void()> onLengthChange;
+
+private:
+	int index;
+	int position;
+	bool channels[NUM_VOICES];
+
+	OwnedArray<Note> sequence;
+	Random random;
+
+	bool chance(double probability);
 };

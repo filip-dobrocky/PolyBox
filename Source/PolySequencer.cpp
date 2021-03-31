@@ -3,12 +3,19 @@
 PolySequencer::PolySequencer(int tempo, int duration, Fraction timeSignature, int sampleRate)
 {
 	for (int i = 0; i < NUM_VOICES; i++)
+	{
 		voices[i] = new SequencerVoice(i, DEFAULT_STEPS);
+		voices[i]->onLengthChange = [&] { lengthChanged(); };
+	}
 	
 	this->tempo = tempo;
 	this->duration = duration;
 	this->timeSignature = timeSignature;
 	this->sampleRate = sampleRate;
+
+	playing = false;
+	position = 0;
+	steps = calculateSteps();
 }
 
 PolySequencer::~PolySequencer()
@@ -27,7 +34,7 @@ int PolySequencer::getDuration() { return duration; }
 
 bool PolySequencer::isPlaying() { return playing; };
 
-float PolySequencer::getTimeSignature() { return (float)timeSignature.a / timeSignature.b; }
+float PolySequencer::getTimeSignature() { return (float)timeSignature.a / (float)timeSignature.b; }
 
 void PolySequencer::setTempo(int tempo) 
 {
@@ -47,7 +54,22 @@ void PolySequencer::setTimeSignature(int a, int b)
 
 int PolySequencer::getInterval()
 {
-	return (240000 / steps) * tempo * duration * timeSignature.a / timeSignature.b;
+	auto interval = ((240000 / tempo) * duration * timeSignature.a / timeSignature.b) / steps;
+	return interval;
+}
+
+void PolySequencer::lengthChanged()
+{
+	auto oldSteps = steps;
+	steps = calculateSteps();
+	auto newPos = position * ((float)steps / (float)oldSteps);
+	position = truncatePositiveToUnsignedInt(newPos);
+	
+	for (auto voice : voices)
+		voice->setPosition(position / (steps / voice->getLength()));
+	
+	if (isTimerRunning())
+		startTimer(getInterval());
 }
 
 void PolySequencer::setSampleRate(int sampleRate)
@@ -57,7 +79,7 @@ void PolySequencer::setSampleRate(int sampleRate)
 
 bool PolySequencer::shouldPlay(SequencerVoice* v)
 {
-	return !(position % v->getLength());
+	return !(position % (steps / v->getLength()));
 }
 
 int PolySequencer::calculateSteps()
@@ -85,6 +107,8 @@ void PolySequencer::stop()
 void PolySequencer::reset()
 {
 	position = 0;
+	for (auto voice : voices)
+		voice->setPosition(0);
 }
 
 void PolySequencer::hiResTimerCallback()
@@ -95,6 +119,7 @@ void PolySequencer::hiResTimerCallback()
 	{
 		if (shouldPlay(voices[i]))
 		{
+			const MessageManagerLock mmLock;
 			auto buffer = voices[i]->step(sample);
 			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
 		}
