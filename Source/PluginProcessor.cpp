@@ -23,7 +23,7 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
 #endif
 {
     mFormatManager.registerBasicFormats();
-    mSequencer = new PolySequencer(120, 1, Fraction{ 4, 4 }, getSampleRate());
+    mSequencer = new PolySequencer(120, 1, Fraction{ 4, 4 });
 }
 
 PolyBoxAudioProcessor::~PolyBoxAudioProcessor()
@@ -175,6 +175,14 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
             sampleCounter = 0;
         }
     }
+
+    midiMessages.clear();
+
+    midiMessages.addEvents(mSequencer->midiMessages,
+                           mSequencer->midiMessages.getFirstEventTime(),
+                           mSequencer->midiMessages.getLastEventTime(), 0);
+
+    mSequencer->midiMessages.clear();
     
     //mSampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }

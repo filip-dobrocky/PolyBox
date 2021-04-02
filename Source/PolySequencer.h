@@ -15,7 +15,7 @@ class PolySequencer
 {
 
 public:
-	PolySequencer(int tempo, int duration, Fraction timeSignature, int sampleRate);
+	PolySequencer(int tempo, int duration, Fraction timeSignature);
 	~PolySequencer();
 
 	SequencerVoice* voices[6];
@@ -54,4 +54,5 @@ private:
 	int getInterval();
 	void lengthChanged();
 	bool shouldPlay(SequencerVoice* v);
+	bool shouldStop(SequencerVoice* v);
 };

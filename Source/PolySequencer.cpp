@@ -1,6 +1,6 @@
 #include "PolySequencer.h"
 
-PolySequencer::PolySequencer(int tempo, int duration, Fraction timeSignature, int sampleRate)
+PolySequencer::PolySequencer(int tempo, int duration, Fraction timeSignature)
 {
 	for (int i = 0; i < NUM_VOICES; i++)
 	{
@@ -11,7 +11,6 @@ PolySequencer::PolySequencer(int tempo, int duration, Fraction timeSignature, in
 	this->tempo = tempo;
 	this->duration = duration;
 	this->timeSignature = timeSignature;
-	this->sampleRate = sampleRate;
 
 	playing = false;
 	position = 0;
@@ -87,6 +86,12 @@ bool PolySequencer::shouldPlay(SequencerVoice* v)
 	return !(position % (steps / v->getLength()));
 }
 
+bool PolySequencer::shouldStop(SequencerVoice* v)
+{
+	auto noteLen = steps / v->getLength();
+	return noteLen - (position % noteLen) == 1;
+}
+
 int PolySequencer::calculateSteps()
 {
 	int result = voices[0]->getLength();
@@ -97,7 +102,6 @@ int PolySequencer::calculateSteps()
 
 void PolySequencer::play()
 {
-	startTime = Time::getMillisecondCounterHiRes() * 0.001;
 	steps = calculateSteps();
 	playing = true;
 }
@@ -121,12 +125,18 @@ void PolySequencer::tick(int sample)
 		if (shouldPlay(voices[i]))
 		{
 			const MessageManagerLock mmLock;
-			auto buffer = voices[i]->getStepMidi(sample);
-			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
 
 			// To prevent shift on length change
 			if (voices[i]->getPosition() != (position / (steps / voices[i]->getLength())))
 				voices[i]->advance();
+
+			auto buffer = voices[i]->getNoteOn(sample);
+			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
+		}
+		else if (shouldStop(voices[i]))
+		{
+			auto buffer = voices[i]->getNoteOff(sample);
+			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
 		}
 	}
 

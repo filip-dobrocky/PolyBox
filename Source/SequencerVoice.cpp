@@ -13,6 +13,8 @@ SequencerVoice::SequencerVoice(int index, int length)
 
 	for (int i = 0; i < NUM_VOICES; i++)
 		channels[i] = false;
+
+	assignChannel(index);
 	
 	random.setSeed(Time::currentTimeMillis());
 }
@@ -101,7 +103,7 @@ void SequencerVoice::advance()
 	onStep();
 }
 
-MidiBuffer SequencerVoice::getStepMidi(int sample)
+MidiBuffer SequencerVoice::getNoteOn(int sample)
 {
 	auto note = sequence[position];
 	MidiBuffer buffer;
@@ -112,8 +114,23 @@ MidiBuffer SequencerVoice::getStepMidi(int sample)
 		{
 			for (int i = 0; i < NUM_VOICES; i++)
 				if (channels[i])
-					buffer.addEvent(MidiMessage::noteOn(i, note->number, note->velocity), sample);
+					buffer.addEvent(MidiMessage::noteOn(i + 1, note->number, note->velocity), sample);
 		}
+	}
+
+	return buffer;
+}
+
+MidiBuffer SequencerVoice::getNoteOff(int sample)
+{
+	auto note = sequence[position];
+	MidiBuffer buffer;
+
+	if (note->number != -1)
+	{
+		for (int i = 0; i < NUM_VOICES; i++)
+			if (channels[i])
+				buffer.addEvent(MidiMessage::noteOff(i + 1, note->number, note->velocity), sample);
 	}
 
 	return buffer;
@@ -121,6 +138,6 @@ MidiBuffer SequencerVoice::getStepMidi(int sample)
 
 bool SequencerVoice::chance(double probability)
 {
-	return random.nextDouble() >= probability;
+	return random.nextDouble() <= probability;
 }
 
