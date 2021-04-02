@@ -11,7 +11,7 @@ struct Fraction {
 
 using namespace juce;
 
-class PolySequencer : HighResolutionTimer
+class PolySequencer
 {
 
 public:
@@ -21,7 +21,7 @@ public:
 	SequencerVoice* voices[6];
 	MidiBuffer midiMessages;
 
-	void hiResTimerCallback() override;
+	void tick(int sample);
 
 	void play();
 	void stop();
@@ -33,6 +33,7 @@ public:
 	int getDuration();
 	float getTimeSignature();
 	bool isPlaying();
+	int getIntervalInSamples();
 
 	void setTempo(int tempo);
 	void setDuration(int duration);

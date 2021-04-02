@@ -45,7 +45,7 @@ class SequencerGrid : public juce::Component,
 
         void addStep();
         void removeStep();
-        void advance();
+        void refresh();
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SequencerRow)
     };

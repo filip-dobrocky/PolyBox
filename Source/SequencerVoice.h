@@ -25,6 +25,7 @@ public:
 	int getLength();
 	Note* getNotePtr(int index);
 	Note* getLastNotePtr();
+	MidiBuffer getStepMidi(int sample);
 	//void setLength(int length);
 
 	void assignChannel(int channel);
@@ -32,7 +33,8 @@ public:
 	void eraseNote(int index);
 	void grow();
 	void shrink();
-	MidiBuffer step(int sample);
+	void advance();
+
 
 	std::function<void()> onStep;
 	std::function<void()> onLengthChange;

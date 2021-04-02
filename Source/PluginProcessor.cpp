@@ -104,6 +104,7 @@ void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& ne
 void PolyBoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     mSampler.setCurrentPlaybackSampleRate(sampleRate);
+    mSequencer->setSampleRate(sampleRate);
 }
 
 void PolyBoxAudioProcessor::releaseResources()
@@ -148,10 +149,34 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     // This is here to avoid people getting screaming feedback
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; i++)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    mSampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+
+    //Sequencer Control
+    auto interval = mSequencer->getIntervalInSamples();
+    if (clockInterval != interval)
+    {
+        clockInterval = interval;
+        sampleCounter = 0;
+    }
+
+    for (int i = 0; i < buffer.getNumSamples(); i++)
+    {
+        if (mSequencer->isPlaying())
+        {
+            if (sampleCounter++ == 0)
+                mSequencer->tick(i);
+            if (sampleCounter == clockInterval)
+                sampleCounter = 0;
+        }
+        else
+        {
+            sampleCounter = 0;
+        }
+    }
+    
+    //mSampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
 //==============================================================================

@@ -93,7 +93,15 @@ void SequencerVoice::shrink()
 	onLengthChange();
 }
 
-MidiBuffer SequencerVoice::step(int sample)
+void SequencerVoice::advance()
+{
+	if (++position == sequence.size())
+		position = 0;
+	
+	onStep();
+}
+
+MidiBuffer SequencerVoice::getStepMidi(int sample)
 {
 	auto note = sequence[position];
 	MidiBuffer buffer;
@@ -107,11 +115,6 @@ MidiBuffer SequencerVoice::step(int sample)
 					buffer.addEvent(MidiMessage::noteOn(i, note->number, note->velocity), sample);
 		}
 	}
-
-	onStep();
-
-	if (++position == sequence.size())
-		position = 0;
 
 	return buffer;
 }

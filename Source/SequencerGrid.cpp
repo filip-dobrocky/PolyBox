@@ -156,7 +156,7 @@ SequencerGrid::SequencerRow::SequencerRow(SequencerVoice* voice, SequencerGrid* 
         addAndMakeVisible(steps.add(step));
     }
 
-    voice->onStep = [&] { advance(); };
+    voice->onStep = [&] { refresh(); };
 }
 
 SequencerGrid::SequencerRow::~SequencerRow()
@@ -212,12 +212,19 @@ void SequencerGrid::SequencerRow::removeStep()
     resized();
 }
 
-void SequencerGrid::SequencerRow::advance()
+void SequencerGrid::SequencerRow::refresh()
 {
-    auto activeStep = steps[voice->getPosition()];
-    auto previousStep = voice->getPosition() ? steps[voice->getPosition() - 1] : steps[steps.size() - 1];
-    activeStep->setActive(true);
-    previousStep->setActive(false);
-    activeStep->repaint();
-    previousStep->repaint();
+    for (int i = 0; i < steps.size(); i++)
+    {
+        if (i == voice->getPosition() && !steps[i]->isActive())
+        {
+            steps[i]->setActive(true);
+            steps[i]->repaint();
+        }
+        else if (steps[i]->isActive())
+        {
+            steps[i]->setActive(false);
+            steps[i]->repaint();
+        }
+    }
 }
