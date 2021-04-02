@@ -124,8 +124,6 @@ void PolySequencer::tick(int sample)
 	{
 		if (shouldPlay(voices[i]))
 		{
-			const MessageManagerLock mmLock;
-
 			// To prevent shift on length change
 			if (voices[i]->getPosition() != (position / (steps / voices[i]->getLength())))
 				voices[i]->advance();

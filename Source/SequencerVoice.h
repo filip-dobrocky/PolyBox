@@ -36,8 +36,6 @@ public:
 	void shrink();
 	void advance();
 
-
-	std::function<void()> onStep;
 	std::function<void()> onLengthChange;
 
 private:

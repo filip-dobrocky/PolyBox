@@ -65,6 +65,12 @@ void SequencerGrid::resized()
     fbGrid.performLayout(area.toFloat());
 }
 
+void SequencerGrid::timerCallback()
+{
+    for (auto row : rows)
+        row->refresh();
+}
+
 void SequencerGrid::stepSelected(SequencerStep* step)
 {
     if (selectedStep)
@@ -107,11 +113,13 @@ void SequencerGrid::togglePlay()
     {
         sequencer->stop();
         playButton.setButtonText("Play");
+        stopTimer();
     }
     else
     {
         sequencer->play();
         playButton.setButtonText("Stop");
+        startTimer(30);
     }
 }
 
@@ -155,8 +163,6 @@ SequencerGrid::SequencerRow::SequencerRow(SequencerVoice* voice, SequencerGrid* 
         step->addListener(grid);
         addAndMakeVisible(steps.add(step));
     }
-
-    voice->onStep = [&] { refresh(); };
 }
 
 SequencerGrid::SequencerRow::~SequencerRow()
@@ -186,16 +192,6 @@ void SequencerGrid::SequencerRow::resized()
     fb.performLayout(area.toFloat());
 }
 
-/*void SequencerGrid::SequencerRow::positionAdvanced(int position)
-{
-    auto activeStep = steps[position];
-    auto previousStep = position ? steps[position - 1] : steps[steps.size() - 1];
-    activeStep->setActive(true);
-    previousStep->setActive(false);
-    activeStep->repaint();
-    previousStep->repaint();
-}*/
-
 void SequencerGrid::SequencerRow::addStep()
 {
     voice->grow();
@@ -216,10 +212,13 @@ void SequencerGrid::SequencerRow::refresh()
 {
     for (int i = 0; i < steps.size(); i++)
     {
-        if (i == voice->getPosition() && !steps[i]->isActive())
+        if (i == voice->getPosition())
         {
-            steps[i]->setActive(true);
-            steps[i]->repaint();
+            if (!steps[i]->isActive())
+            {
+                steps[i]->setActive(true);
+                steps[i]->repaint();
+            }
         }
         else if (steps[i]->isActive())
         {

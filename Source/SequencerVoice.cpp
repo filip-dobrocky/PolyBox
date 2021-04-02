@@ -99,8 +99,6 @@ void SequencerVoice::advance()
 {
 	if (++position == sequence.size())
 		position = 0;
-	
-	onStep();
 }
 
 MidiBuffer SequencerVoice::getNoteOn(int sample)

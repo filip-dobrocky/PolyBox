@@ -152,7 +152,7 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; i++)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-
+    
     //Sequencer Control
     auto interval = mSequencer->getIntervalInSamples();
     if (clockInterval != interval)

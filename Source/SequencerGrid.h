@@ -20,11 +20,11 @@
 */
 
 class SequencerGrid : public juce::Component,
-    public SequencerStep::Listener
+                      public SequencerStep::Listener,
+                      public Timer
 {
 
-    class SequencerRow : public Component/*,
-                         public SequencerVoice::Listener*/
+    class SequencerRow : public Component
     {
     public:
         SequencerRow(SequencerVoice* voice, SequencerGrid* grid);
@@ -34,7 +34,7 @@ class SequencerGrid : public juce::Component,
 
         void paint(juce::Graphics&) override;
         void resized() override;
-        //void positionAdvanced(int position) override;
+        void refresh();
 
     private:
         SequencerVoice* voice;
@@ -45,7 +45,6 @@ class SequencerGrid : public juce::Component,
 
         void addStep();
         void removeStep();
-        void refresh();
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SequencerRow)
     };
@@ -56,6 +55,7 @@ public:
 
     void paint(juce::Graphics&) override;
     void resized() override;
+    void timerCallback() override;
 
     void stepSelected(SequencerStep* step) override;
 
