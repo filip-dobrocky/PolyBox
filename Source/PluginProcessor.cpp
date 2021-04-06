@@ -151,14 +151,13 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; i++)
         buffer.clear (i, 0, buffer.getNumSamples());
-
     
     //Sequencer Control
     auto interval = mSequencer->getIntervalInSamples();
     if (clockInterval != interval)
     {
+        DBG(interval);
         clockInterval = interval;
-        sampleCounter = 0;
     }
 
     for (int i = 0; i < buffer.getNumSamples(); i++)
@@ -167,7 +166,7 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         {
             if (sampleCounter++ == 0)
                 mSequencer->tick(i);
-            if (sampleCounter == clockInterval)
+            if (sampleCounter >= clockInterval)
                 sampleCounter = 0;
         }
         else
@@ -183,7 +182,15 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
                            mSequencer->midiMessages.getLastEventTime(), 0);
 
     mSequencer->midiMessages.clear();
-    
+
+    /*if (auto ph = getPlayHead())
+    {
+        AudioPlayHead::CurrentPositionInfo info;
+        if (ph->getCurrentPosition(info))
+        {
+
+        }
+    }*/
     //mSampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 

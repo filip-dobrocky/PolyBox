@@ -113,6 +113,7 @@ MidiBuffer SequencerVoice::getNoteOn(int sample)
 			for (int i = 0; i < NUM_VOICES; i++)
 				if (channels[i])
 					buffer.addEvent(MidiMessage::noteOn(i + 1, note->number, note->velocity), sample);
+			playedNote = note->number;
 		}
 	}
 
@@ -121,15 +122,18 @@ MidiBuffer SequencerVoice::getNoteOn(int sample)
 
 MidiBuffer SequencerVoice::getNoteOff(int sample)
 {
-	auto note = sequence[position];
 	MidiBuffer buffer;
 
-	if (note->number != -1)
+	for (int i = 0; i < NUM_VOICES; i++)
 	{
-		for (int i = 0; i < NUM_VOICES; i++)
-			if (channels[i])
-				buffer.addEvent(MidiMessage::noteOff(i + 1, note->number, note->velocity), sample);
+		if (channels[i])
+		{
+			if (playedNote != -1)
+				buffer.addEvent(MidiMessage::noteOff(i + 1, playedNote), sample);
+		}
 	}
+
+	playedNote = -1;
 
 	return buffer;
 }

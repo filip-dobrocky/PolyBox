@@ -41,6 +41,7 @@ public:
 private:
 	int index;
 	int position;
+	int playedNote{ -1 };
 	bool channels[NUM_VOICES];
 
 	OwnedArray<Note> sequence;

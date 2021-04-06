@@ -51,12 +51,6 @@ void PolySequencer::setTimeSignature(int a, int b)
 	timeSignature.b = b;
 }
 
-int PolySequencer::getInterval()
-{
-	auto interval = ((240000 / tempo) * duration * timeSignature.a / timeSignature.b) / steps;
-	return interval;
-}
-
 int PolySequencer::getIntervalInSamples()
 {
 	int interval = sampleRate * (((240.0f / (double)tempo) * duration * (double)timeSignature.a / (double)timeSignature.b) / (double)steps);
@@ -86,18 +80,15 @@ bool PolySequencer::shouldPlay(SequencerVoice* v)
 	return !(position % (steps / v->getLength()));
 }
 
-bool PolySequencer::shouldStop(SequencerVoice* v)
-{
-	auto noteLen = steps / v->getLength();
-	return noteLen - (position % noteLen) == 1;
-}
-
 int PolySequencer::calculateSteps()
 {
 	int result = voices[0]->getLength();
 	for (int i = 1; i < NUM_VOICES; i++)
 		result = math::lcm(result, voices[i]->getLength());
-	return result;
+
+	int max = sampleRate * (240.0f / tempo) * duration * ((double)timeSignature.a / (double)timeSignature.b);
+
+	return result < max ? result : max;
 }
 
 void PolySequencer::play()
@@ -108,6 +99,11 @@ void PolySequencer::play()
 
 void PolySequencer::stop()
 {
+	midiMessages.clear();
+	for (int i = 1; i <= 6; i++)
+		for (int j = 0; j < 128; j++)
+			midiMessages.addEvent(MidiMessage::noteOff(i, j), lastSample);
+	
 	playing = false;
 }
 
@@ -128,18 +124,18 @@ void PolySequencer::tick(int sample)
 			if (voices[i]->getPosition() != (position / (steps / voices[i]->getLength())))
 				voices[i]->advance();
 
-			auto buffer = voices[i]->getNoteOn(sample);
-			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
-		}
-		else if (shouldStop(voices[i]))
-		{
 			auto buffer = voices[i]->getNoteOff(sample);
+			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
+
+			buffer.swapWith(voices[i]->getNoteOn(sample + 1));
 			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
 		}
 	}
 
 	if (++position == steps)
 		position = 0;
+
+	lastSample = sample;
 }
 
 
