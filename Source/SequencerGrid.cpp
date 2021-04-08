@@ -20,11 +20,6 @@ SequencerGrid::SequencerGrid(PolySequencer* sequencer)
     addAndMakeVisible(velocitySlider);
     addAndMakeVisible(probabilitySlider);
 
-    playButton.onClick = [&] { togglePlay(); };
-    resetButton.onClick = [&] { reset(); };
-    addAndMakeVisible(playButton);
-    addAndMakeVisible(resetButton);
-
     erase();
 }
 
@@ -43,7 +38,7 @@ void SequencerGrid::paint (juce::Graphics& g)
 
 void SequencerGrid::resized()
 {
-    FlexBox fbGrid, fbSliders, fbButtons;
+    FlexBox fbGrid, fbSliders;
     fbGrid.flexDirection = FlexBox::Direction::column;
 
     auto margin = FlexItem::Margin(10, 10, 10, 10);
@@ -51,16 +46,12 @@ void SequencerGrid::resized()
     fbSliders.items.add(FlexItem(velocitySlider).withFlex(1).withMargin(margin));
     fbSliders.items.add(FlexItem(probabilitySlider).withFlex(1).withMargin(margin));
 
-    fbButtons.items.add(FlexItem(playButton).withFlex(1).withMargin(margin));
-    fbButtons.items.add(FlexItem(resetButton).withFlex(1).withMargin(margin));
-
     for (int i = 0; i < NUM_VOICES; i++)
     {
         fbGrid.items.add(FlexItem(*rows[i]).withMinHeight(50.0f).withFlex(1));
     }
 
     auto area = getLocalBounds();
-    fbButtons.performLayout(area.removeFromBottom(getHeight() * 0.15).toFloat());
     fbSliders.performLayout(area.removeFromBottom(getHeight() * 0.15).toFloat());
     fbGrid.performLayout(area.toFloat());
 }
@@ -112,13 +103,11 @@ void SequencerGrid::togglePlay()
     if (sequencer->isPlaying())
     {
         sequencer->stop();
-        playButton.setButtonText("Play");
         stopTimer();
     }
     else
     {
         sequencer->play();
-        playButton.setButtonText("Stop");
         startTimer(30);
     }
 }

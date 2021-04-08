@@ -26,11 +26,19 @@ public:
     void resized() override;
 
 private:
-    TextButton mLoadSampleButton{ "Load Sample" };
-    TextButton mLoadTuningButton{ "Load Tuning" };
     SequencerGrid* mSequencerGrid;
 
+    TextButton playButton{ "Play" };
+    TextButton resetButton{ "Reset" };
+    Slider bpmSlider;
+    ToggleButton syncButton;
+    DurationSlider durationSlider;
+
     PolyBoxAudioProcessor& audioProcessor;
+
+    void toggleSync();
+    void durationChanged();
+    void bpmChanged();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolyBoxAudioProcessorEditor)
 };

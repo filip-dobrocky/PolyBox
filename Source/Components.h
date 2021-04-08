@@ -75,3 +75,18 @@ public:
 private:
     Label l;
 };
+
+class DurationSlider : public Slider
+{
+public:
+    DurationSlider()
+    {
+        setSliderStyle(Slider::LinearBar);
+        setRange(1, 10, 1);
+    }
+
+    String 	getTextFromValue(double value) override
+    {
+        return String(value) + (value == 1 ? " bar" : " bars");
+    }
+};

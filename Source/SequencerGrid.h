@@ -57,6 +57,9 @@ public:
     void resized() override;
     void timerCallback() override;
 
+    void togglePlay();
+    void reset();
+
     void stepSelected(SequencerStep* step) override;
 
 private:
@@ -66,14 +69,10 @@ private:
     NoteSlider noteSlider;
     FloatSlider velocitySlider{ "Velocity" };
     FloatSlider probabilitySlider{ "Probability" };
-    TextButton playButton{ "Play" };
-    TextButton resetButton{ "Reset" };
 
     void noteChanged();
     void velocityChanged();
     void probabilityChanged();
-    void togglePlay();
-    void reset();
     void erase();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SequencerGrid)

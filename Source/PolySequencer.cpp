@@ -1,6 +1,8 @@
 #include "PolySequencer.h"
 
-PolySequencer::PolySequencer(int tempo, int duration, Fraction timeSignature)
+PolySequencer::PolySequencer() : tempo(120),
+								 duration(1),
+								 timeSignature(Fraction{ 4, 4 })
 {
 	for (int i = 0; i < NUM_VOICES; i++)
 	{

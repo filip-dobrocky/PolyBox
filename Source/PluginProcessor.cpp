@@ -23,7 +23,7 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
 #endif
 {
     mFormatManager.registerBasicFormats();
-    mSequencer = new PolySequencer(120, 1, Fraction{ 4, 4 });
+    mSequencer = new PolySequencer();
 }
 
 PolyBoxAudioProcessor::~PolyBoxAudioProcessor()
@@ -89,6 +89,11 @@ void PolyBoxAudioProcessor::setCurrentProgram (int index)
 const juce::String PolyBoxAudioProcessor::getProgramName (int index)
 {
     return {};
+}
+
+bool PolyBoxAudioProcessor::canSync()
+{
+    return getPlayHead();
 }
 
 PolySequencer* PolyBoxAudioProcessor::getSequencerPtr()
@@ -183,14 +188,19 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 
     mSequencer->midiMessages.clear();
 
-    /*if (auto ph = getPlayHead())
+    if (syncOn)
     {
-        AudioPlayHead::CurrentPositionInfo info;
-        if (ph->getCurrentPosition(info))
+        if (auto ph = getPlayHead())
         {
-
+            AudioPlayHead::CurrentPositionInfo info;
+            if (ph->getCurrentPosition(info))
+            {
+                mSequencer->setTempo(info.bpm);
+                mSequencer->setTimeSignature(info.timeSigNumerator, info.timeSigDenominator);
+            }
         }
-    }*/
+    }
+
     //mSampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 

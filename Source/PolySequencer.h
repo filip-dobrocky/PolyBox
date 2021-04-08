@@ -15,7 +15,7 @@ class PolySequencer
 {
 
 public:
-	PolySequencer(int tempo, int duration, Fraction timeSignature);
+	PolySequencer();
 	~PolySequencer();
 
 	SequencerVoice* voices[6];

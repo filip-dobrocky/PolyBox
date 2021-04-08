@@ -61,6 +61,9 @@ public:
     void loadSample();
     void loadTuning();
 
+    bool syncOn{ false };
+    bool canSync();
+
     PolySequencer* getSequencerPtr();
 
 private:
