@@ -16,6 +16,8 @@ SequencerGrid::SequencerGrid(PolySequencer* sequencer)
     noteSlider.s.onValueChange = [&] { noteChanged(); };
     velocitySlider.s.onValueChange = [&] { velocityChanged(); };
     probabilitySlider.s.onValueChange = [&] { probabilityChanged(); };
+    velocitySlider.setEnabled(false);
+    probabilitySlider.setEnabled(false);
     addAndMakeVisible(noteSlider);
     addAndMakeVisible(velocitySlider);
     addAndMakeVisible(probabilitySlider);
@@ -140,11 +142,13 @@ SequencerGrid::SequencerRow::SequencerRow(SequencerVoice* voice, SequencerGrid* 
     this->voice = voice;
     this->grid = grid;
 
-    plusButton.onClick = [&] { addStep(); };
-    minusButton.onClick = [&] { removeStep(); };
+    lengthSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
+    lengthSlider.setRange(1, 32, 1);
+    lengthSlider.setValue(previousLength = voice->getLength());
+    lengthSlider.setIncDecButtonsMode(Slider::IncDecButtonMode::incDecButtonsDraggable_Horizontal);
+    lengthSlider.onValueChange = [&] { lengthChanged(); };
+    addAndMakeVisible(lengthSlider);
 
-    addAndMakeVisible(plusButton);
-    addAndMakeVisible(minusButton);
 
     for (int i = 0; i < voice->getLength(); i++)
     {
@@ -173,8 +177,8 @@ void SequencerGrid::SequencerRow::resized()
         fb.items.add(FlexItem(*step).withFlex(1)); // withFlex?
     }
 
-    fbButtons.items.add(FlexItem(plusButton).withFlex(1));
-    fbButtons.items.add(FlexItem(minusButton).withFlex(1));
+    fbButtons.items.add(FlexItem(lengthSlider).withFlex(1).withMargin(FlexItem::Margin(0, 5, 0, 5)));
+    lengthSlider.setTextBoxStyle(Slider::TextBoxAbove, false, lengthSlider.getWidth(), 20);
     
     auto area = getLocalBounds();
     fbButtons.performLayout(area.removeFromRight(getWidth() * 0.1).toFloat());
@@ -194,6 +198,33 @@ void SequencerGrid::SequencerRow::removeStep()
 {
     steps.removeLast();
     voice->shrink();
+    resized();
+}
+
+void SequencerGrid::SequencerRow::lengthChanged()
+{
+    const auto difference = lengthSlider.getValue() - previousLength;
+    previousLength = lengthSlider.getValue();
+
+    if (difference > 0)
+    {
+        for (int i = 0; i < difference; i++)
+        {
+            voice->grow();
+            auto step = new SequencerStep(voice->getLastNotePtr());
+            step->addListener(grid);
+            addAndMakeVisible(steps.add(step));
+        }
+    }
+    else if (difference < 0)
+    {
+        for (int i = 0; i < -difference; i++)
+        {
+            steps.removeLast();
+            voice->shrink();
+        }
+    }
+
     resized();
 }
 

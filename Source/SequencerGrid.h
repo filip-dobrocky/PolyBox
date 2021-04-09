@@ -40,11 +40,13 @@ class SequencerGrid : public juce::Component,
         SequencerVoice* voice;
         SequencerGrid* grid;
 
-        TextButton plusButton{ "+" };
-        TextButton minusButton{ "-" };
+        Slider lengthSlider;
+        int previousLength;
+
 
         void addStep();
         void removeStep();
+        void lengthChanged();
 
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SequencerRow)
     };

@@ -11,18 +11,45 @@
 
 //==============================================================================
 PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+    : AudioProcessorEditor (&p), audioProcessor (p), tabs(TabbedButtonBar::TabsAtTop)
 {
-    mSequencerGrid = new SequencerGrid(audioProcessor.getSequencerPtr());
-    addAndMakeVisible(mSequencerGrid);
+    auto colour = findColour(ResizableWindow::backgroundColourId);
+    tabs.addTab("Play", colour, new MainPage(p), true);
+    addAndMakeVisible(tabs);
+
+    setSize (1000, 500);
+}
+
+PolyBoxAudioProcessorEditor::~PolyBoxAudioProcessorEditor()
+{
+}
+
+//==============================================================================
+void PolyBoxAudioProcessorEditor::paint (juce::Graphics& g)
+{
+    // (Our component is opaque, so we must completely fill the background with a solid colour)
+    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+
+}
+
+void PolyBoxAudioProcessorEditor::resized()
+{
+    tabs.setBounds(getLocalBounds());
+}
+
+
+PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audioProcessor(p)
+{
+    sequencerGrid = new SequencerGrid(audioProcessor.getSequencerPtr());
+    addAndMakeVisible(sequencerGrid);
 
     playButton.setClickingTogglesState(true);
-    playButton.onClick = [&] { 
+    playButton.onClick = [&] {
         bool playing = playButton.getToggleState();
         playButton.setButtonText(playing ? "Stop" : "Play");
-        mSequencerGrid->togglePlay();
+        sequencerGrid->togglePlay();
     };
-    resetButton.onClick = [&] { mSequencerGrid->reset(); };
+    resetButton.onClick = [&] { sequencerGrid->reset(); };
     addAndMakeVisible(playButton);
     addAndMakeVisible(resetButton);
 
@@ -30,6 +57,7 @@ PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor&
     bpmSlider.setRange(30, 300, 1);
     bpmSlider.setTextValueSuffix(" BPM");
     bpmSlider.onValueChange = [&] { bpmChanged(); };
+    bpmSlider.setValue(p.getSequencerPtr()->getTempo());
     addAndMakeVisible(bpmSlider);
 
     if (p.canSync())
@@ -43,26 +71,14 @@ PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor&
 
     durationSlider.onValueChange = [&] { durationChanged(); };
     addAndMakeVisible(durationSlider);
-
-    setSize (1000, 500);
 }
 
-PolyBoxAudioProcessorEditor::~PolyBoxAudioProcessorEditor()
+PolyBoxAudioProcessorEditor::MainPage::~MainPage()
 {
-    delete mSequencerGrid;
+    delete sequencerGrid;
 }
 
-//==============================================================================
-void PolyBoxAudioProcessorEditor::paint (juce::Graphics& g)
-{
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-}
-
-void PolyBoxAudioProcessorEditor::resized()
+void PolyBoxAudioProcessorEditor::MainPage::resized()
 {
     FlexBox topBarFb;
 
@@ -76,10 +92,10 @@ void PolyBoxAudioProcessorEditor::resized()
 
     auto bounds = getLocalBounds();
     topBarFb.performLayout(bounds.removeFromTop(50));
-    mSequencerGrid->setBounds(bounds);
+    sequencerGrid->setBounds(bounds);
 }
 
-void PolyBoxAudioProcessorEditor::toggleSync()
+void PolyBoxAudioProcessorEditor::MainPage::toggleSync()
 {
     const auto state = syncButton.getToggleState();
     const auto seq = audioProcessor.getSequencerPtr();
@@ -91,13 +107,13 @@ void PolyBoxAudioProcessorEditor::toggleSync()
     bpmSlider.setEnabled(!state);
 }
 
-void PolyBoxAudioProcessorEditor::durationChanged()
+void PolyBoxAudioProcessorEditor::MainPage::durationChanged()
 {
     const auto seq = audioProcessor.getSequencerPtr();
     seq->setDuration(durationSlider.getValue());
 }
 
-void PolyBoxAudioProcessorEditor::bpmChanged()
+void PolyBoxAudioProcessorEditor::MainPage::bpmChanged()
 {
     const auto seq = audioProcessor.getSequencerPtr();
     seq->setTempo(bpmSlider.getValue());

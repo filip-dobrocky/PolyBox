@@ -17,6 +17,28 @@
 */
 class PolyBoxAudioProcessorEditor : public juce::AudioProcessorEditor
 {
+    struct MainPage : Component
+    {
+        MainPage(PolyBoxAudioProcessor&);
+        ~MainPage();
+
+        void resized() override;
+
+        SequencerGrid* sequencerGrid;
+
+        TextButton playButton{ "Play" };
+        TextButton resetButton{ "Reset" };
+        Slider bpmSlider;
+        ToggleButton syncButton;
+        DurationSlider durationSlider;
+
+        void toggleSync();
+        void durationChanged();
+        void bpmChanged();
+
+        PolyBoxAudioProcessor& audioProcessor;
+    };
+
 public:
     PolyBoxAudioProcessorEditor(PolyBoxAudioProcessor&);
     ~PolyBoxAudioProcessorEditor() override;
@@ -26,19 +48,8 @@ public:
     void resized() override;
 
 private:
-    SequencerGrid* mSequencerGrid;
-
-    TextButton playButton{ "Play" };
-    TextButton resetButton{ "Reset" };
-    Slider bpmSlider;
-    ToggleButton syncButton;
-    DurationSlider durationSlider;
-
     PolyBoxAudioProcessor& audioProcessor;
-
-    void toggleSync();
-    void durationChanged();
-    void bpmChanged();
+    TabbedComponent tabs;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolyBoxAudioProcessorEditor)
 };
