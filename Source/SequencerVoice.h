@@ -31,6 +31,8 @@ public:
 
 	void assignChannel(int channel);
 	void deassignChannel(int channel);
+	bool hasChannel(int channel);
+
 	void eraseNote(int index);
 	void grow();
 	void shrink();

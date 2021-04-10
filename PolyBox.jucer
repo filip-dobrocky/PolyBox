@@ -13,25 +13,25 @@
               file="Source/SequencerStep.cpp"/>
         <FILE id="tf3SV1" name="SequencerStep.h" compile="0" resource="0" file="Source/SequencerStep.h"/>
       </GROUP>
-      <FILE id="tjLFsi" name="Math.cpp" compile="1" resource="0" file="Source/Math.cpp"/>
       <FILE id="I5vER2" name="Math.h" compile="0" resource="0" file="Source/Math.h"/>
-      <FILE id="T891VQ" name="SequencerVoice.cpp" compile="1" resource="0"
-            file="Source/SequencerVoice.cpp"/>
-      <FILE id="ccROah" name="PolySequencer.cpp" compile="1" resource="0"
-            file="Source/PolySequencer.cpp"/>
-      <FILE id="mT28hF" name="PolySequencer.h" compile="0" resource="0" file="Source/PolySequencer.h"/>
+      <FILE id="kblshd" name="Math.cpp" compile="1" resource="0" file="Source/Math.cpp"/>
       <FILE id="na25NR" name="SequencerVoice.h" compile="0" resource="0"
             file="Source/SequencerVoice.h"/>
+      <FILE id="T891VQ" name="SequencerVoice.cpp" compile="1" resource="0"
+            file="Source/SequencerVoice.cpp"/>
+      <FILE id="mT28hF" name="PolySequencer.h" compile="0" resource="0" file="Source/PolySequencer.h"/>
+      <FILE id="ccROah" name="PolySequencer.cpp" compile="1" resource="0"
+            file="Source/PolySequencer.cpp"/>
       <FILE id="npqhmu" name="MicroSampler.h" compile="0" resource="0" file="Source/MicroSampler.h"/>
       <FILE id="uB9TnI" name="MicroSampler.cpp" compile="1" resource="0"
             file="Source/MicroSampler.cpp"/>
-      <FILE id="Pr0pHy" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
       <FILE id="PcW6oC" name="PluginProcessor.h" compile="0" resource="0"
             file="Source/PluginProcessor.h"/>
+      <FILE id="Pr0pHy" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="Source/PluginProcessor.cpp"/>
+      <FILE id="zZg1D0" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
       <FILE id="dMQQai" name="PluginEditor.cpp" compile="1" resource="0"
             file="Source/PluginEditor.cpp"/>
-      <FILE id="zZg1D0" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
   </MAINGROUP>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>

@@ -9,10 +9,6 @@ PolySequencer::PolySequencer() : tempo(120),
 		voices[i] = new SequencerVoice(i, DEFAULT_STEPS);
 		voices[i]->onLengthChange = [&] { lengthChanged(); };
 	}
-	
-	this->tempo = tempo;
-	this->duration = duration;
-	this->timeSignature = timeSignature;
 
 	playing = false;
 	position = 0;

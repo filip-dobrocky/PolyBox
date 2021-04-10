@@ -39,6 +39,19 @@ class PolyBoxAudioProcessorEditor : public juce::AudioProcessorEditor
         PolyBoxAudioProcessor& audioProcessor;
     };
 
+    struct ConfigPage : Component,
+                        ConnectionMatrix::Listener
+    {
+        ConfigPage(PolyBoxAudioProcessor&);
+
+        void resized() override;
+
+        void connectionChanged(int voice, int channel, bool state) override;
+
+        ConnectionMatrix matrix;
+        PolyBoxAudioProcessor& audioProcessor;
+    };
+
 public:
     PolyBoxAudioProcessorEditor(PolyBoxAudioProcessor&);
     ~PolyBoxAudioProcessorEditor() override;

@@ -15,6 +15,7 @@ PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor&
 {
     auto colour = findColour(ResizableWindow::backgroundColourId);
     tabs.addTab("Play", colour, new MainPage(p), true);
+    tabs.addTab("Config", colour, new ConfigPage(p), true);
     addAndMakeVisible(tabs);
 
     setSize (1000, 500);
@@ -117,4 +118,25 @@ void PolyBoxAudioProcessorEditor::MainPage::bpmChanged()
 {
     const auto seq = audioProcessor.getSequencerPtr();
     seq->setTempo(bpmSlider.getValue());
+}
+
+PolyBoxAudioProcessorEditor::ConfigPage::ConfigPage(PolyBoxAudioProcessor& p) : audioProcessor(p)
+{
+    matrix.addListener(this);
+    matrix.initialise(p.getSequencerPtr());
+    addAndMakeVisible(matrix);
+}
+
+void PolyBoxAudioProcessorEditor::ConfigPage::resized()
+{
+    matrix.setBounds(30, 30, 200, 200);
+}
+
+void PolyBoxAudioProcessorEditor::ConfigPage::connectionChanged(int voice, int channel, bool state)
+{
+    auto voicePtr = audioProcessor.getSequencerPtr()->voices[voice];
+    if (state)
+        voicePtr->assignChannel(channel);
+    else
+        voicePtr->deassignChannel(channel);
 }

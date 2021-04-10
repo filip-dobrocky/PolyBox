@@ -2520,10 +2520,10 @@
     <ClInclude Include="..\..\Source\Math.h">
       <Filter>PolyBox\Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\PolySequencer.h">
+    <ClInclude Include="..\..\Source\SequencerVoice.h">
       <Filter>PolyBox\Source</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Source\SequencerVoice.h">
+    <ClInclude Include="..\..\Source\PolySequencer.h">
       <Filter>PolyBox\Source</Filter>
     </ClInclude>
     <ClInclude Include="..\..\Source\MicroSampler.h">

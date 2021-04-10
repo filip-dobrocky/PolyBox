@@ -73,6 +73,11 @@ void SequencerVoice::deassignChannel(int channel)
 		throw "Channel out of bounds";
 }
 
+bool SequencerVoice::hasChannel(int channel)
+{
+	return channels[channel];
+}
+
 
 void SequencerVoice::eraseNote(int position)
 {

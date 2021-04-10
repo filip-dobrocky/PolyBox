@@ -2059,8 +2059,8 @@
     <ClInclude Include="..\..\Source\SequencerGrid.h"/>
     <ClInclude Include="..\..\Source\SequencerStep.h"/>
     <ClInclude Include="..\..\Source\Math.h"/>
-    <ClInclude Include="..\..\Source\PolySequencer.h"/>
     <ClInclude Include="..\..\Source\SequencerVoice.h"/>
+    <ClInclude Include="..\..\Source\PolySequencer.h"/>
     <ClInclude Include="..\..\Source\MicroSampler.h"/>
     <ClInclude Include="..\..\Source\PluginProcessor.h"/>
     <ClInclude Include="..\..\Source\PluginEditor.h"/>
