@@ -2517,6 +2517,9 @@
     <ClInclude Include="..\..\Source\SequencerStep.h">
       <Filter>PolyBox\Source\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\TuningSelector.h">
+      <Filter>PolyBox\Source\GUI</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\Math.h">
       <Filter>PolyBox\Source</Filter>
     </ClInclude>

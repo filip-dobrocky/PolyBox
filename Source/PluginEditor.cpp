@@ -120,16 +120,19 @@ void PolyBoxAudioProcessorEditor::MainPage::bpmChanged()
     seq->setTempo(bpmSlider.getValue());
 }
 
-PolyBoxAudioProcessorEditor::ConfigPage::ConfigPage(PolyBoxAudioProcessor& p) : audioProcessor(p)
+PolyBoxAudioProcessorEditor::ConfigPage::ConfigPage(PolyBoxAudioProcessor& p) : audioProcessor(p),
+                                                                                tuningSelector(p.tuning)
 {
     matrix.addListener(this);
     matrix.initialise(p.getSequencerPtr());
     addAndMakeVisible(matrix);
+    addAndMakeVisible(tuningSelector);
 }
 
 void PolyBoxAudioProcessorEditor::ConfigPage::resized()
 {
-    matrix.setBounds(30, 30, 200, 200);
+    matrix.setBounds(30, 30, 250, 250);
+    tuningSelector.setBounds(400, 30, 500, 250);
 }
 
 void PolyBoxAudioProcessorEditor::ConfigPage::connectionChanged(int voice, int channel, bool state)

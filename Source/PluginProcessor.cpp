@@ -9,6 +9,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+using namespace Tunings;
+
 //==============================================================================
 PolyBoxAudioProcessor::PolyBoxAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -22,15 +24,15 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
                        )
 #endif
 {
-    mFormatManager.registerBasicFormats();
-    mSequencer = new PolySequencer();
+    formatManager.registerBasicFormats();
+    //tuning = std::make_shared<Tuning>(new Tuning());
+    sequencer = new PolySequencer();
 }
 
 PolyBoxAudioProcessor::~PolyBoxAudioProcessor()
 {
-    delete mFormatReader;
-    delete mSequencer;
-    mTuning = nullptr;
+    delete formatReader;
+    delete sequencer;
 }
 
 //==============================================================================
@@ -98,7 +100,7 @@ bool PolyBoxAudioProcessor::canSync()
 
 PolySequencer* PolyBoxAudioProcessor::getSequencerPtr()
 {
-    return mSequencer;
+    return sequencer;
 }
 
 void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& newName)
@@ -108,8 +110,8 @@ void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& ne
 //==============================================================================
 void PolyBoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    mSampler.setCurrentPlaybackSampleRate(sampleRate);
-    mSequencer->setSampleRate(sampleRate);
+    sampler.setCurrentPlaybackSampleRate(sampleRate);
+    sequencer->setSampleRate(sampleRate);
 }
 
 void PolyBoxAudioProcessor::releaseResources()
@@ -158,7 +160,7 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         buffer.clear (i, 0, buffer.getNumSamples());
     
     //Sequencer Control
-    auto interval = mSequencer->getIntervalInSamples();
+    auto interval = sequencer->getIntervalInSamples();
     if (clockInterval != interval)
     {
         DBG(interval);
@@ -167,10 +169,10 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 
     for (int i = 0; i < buffer.getNumSamples(); i++)
     {
-        if (mSequencer->isPlaying())
+        if (sequencer->isPlaying())
         {
             if (sampleCounter++ == 0)
-                mSequencer->tick(i);
+                sequencer->tick(i);
             if (sampleCounter >= clockInterval)
                 sampleCounter = 0;
         }
@@ -182,11 +184,11 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 
     midiMessages.clear();
 
-    midiMessages.addEvents(mSequencer->midiMessages,
-                           mSequencer->midiMessages.getFirstEventTime(),
-                           mSequencer->midiMessages.getLastEventTime(), 0);
+    midiMessages.addEvents(sequencer->midiMessages,
+                           sequencer->midiMessages.getFirstEventTime(),
+                           sequencer->midiMessages.getLastEventTime(), 0);
 
-    mSequencer->midiMessages.clear();
+    sequencer->midiMessages.clear();
 
     if (syncOn)
     {
@@ -195,13 +197,13 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
             AudioPlayHead::CurrentPositionInfo info;
             if (ph->getCurrentPosition(info))
             {
-                mSequencer->setTempo(info.bpm);
-                mSequencer->setTimeSignature(info.timeSigNumerator, info.timeSigDenominator);
+                sequencer->setTempo(info.bpm);
+                sequencer->setTimeSignature(info.timeSigNumerator, info.timeSigDenominator);
             }
         }
     }
 
-    //mSampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    //sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
 //==============================================================================
@@ -235,37 +237,13 @@ void PolyBoxAudioProcessor::loadSample()
     if (chooser.browseForFileToOpen())
     {
         auto file = chooser.getResult();
-        mFormatReader = mFormatManager.createReaderFor(file);
+        formatReader = formatManager.createReaderFor(file);
 
         BigInteger range;
         range.setRange(0, 128, true);
-        mSampler.addSound(new MicroSamplerSound("sample", *mFormatReader, range, 262, 0.1, 0.3, 10));
+        sampler.addSound(new MicroSamplerSound("sample", *formatReader, range, 262, 0.1, 0.3, 10));
     }
 }
-
-void PolyBoxAudioProcessor::loadTuning()
-{
-    using namespace Tunings;
-    FileChooser sclChooser{ "Load .scl", File::getSpecialLocation(File::userDesktopDirectory), "*.scl" };
-    FileChooser kbmChooser{ "Load .kbm", File::getSpecialLocation(File::userDesktopDirectory), "*.kbm" };
-    Scale s;
-    KeyboardMapping k;
-
-    if (sclChooser.browseForFileToOpen())
-    {
-        s = readSCLFile(sclChooser.getResult().getFullPathName().toStdString());
-        
-        if (kbmChooser.browseForFileToOpen())
-        {
-            k = readKBMFile(kbmChooser.getResult().getFullPathName().toStdString());
-
-            mTuning = new Tuning(s, k);
-            mSampler.clearVoices();
-            mSampler.addVoice(new MicroSamplerVoice(mTuning));
-        }
-    }
-}
-
 
 //==============================================================================
 // This creates new instances of the plugin..

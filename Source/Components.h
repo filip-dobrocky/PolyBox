@@ -91,7 +91,7 @@ public:
     }
 };
 
-class ConnectionMatrix : public Component,
+class ConnectionMatrix : public GroupComponent,
                          public Button::Listener
 {
     struct Toggle : ToggleButton
@@ -108,6 +108,9 @@ class ConnectionMatrix : public Component,
 public:
     ConnectionMatrix()
     {
+        setText("Sequencer routing");
+        setTextLabelPosition(Justification::centred);
+
         for (int i = 0; i < NUM_VOICES; i++)
         {
             for (int j = 0; j < NUM_VOICES; j++)
@@ -126,9 +129,9 @@ public:
         }
 
         voicesLabel.setText("VOICES", NotificationType::dontSendNotification);
-        voicesLabel.setJustificationType(Justification::centred);
+        voicesLabel.setJustificationType(Justification::centredBottom);
         channelsLabel.setText("CHANNELS", NotificationType::dontSendNotification);
-        channelsLabel.setJustificationType(Justification::centred);
+        channelsLabel.setJustificationType(Justification::centredBottom);
         addAndMakeVisible(voicesLabel);
         addAndMakeVisible(channelsLabel);
 
@@ -139,6 +142,10 @@ public:
         Grid grid;
         using Track = Grid::TrackInfo;
         using Fr = Grid::Fr;
+        grid.alignItems = Grid::AlignItems::center;
+        grid.justifyItems = Grid::JustifyItems::center;
+        grid.alignContent = Grid::AlignContent::center;
+        grid.justifyContent = Grid::JustifyContent::center;
 
         for (int i = 0; i < NUM_VOICES + 1; i++)
         {
@@ -157,9 +164,9 @@ public:
             }
         }
 
-        auto bounds = getLocalBounds();
+        auto bounds = getLocalBounds().reduced(15, 30);
         auto chBounds = bounds.removeFromTop(15);
-        chBounds.removeFromLeft(20);
+        chBounds.removeFromLeft(30);
         channelsLabel.setBounds(chBounds);
         auto vBounds = bounds.removeFromLeft(15);
         auto transform = AffineTransform().rotated(-MathConstants<float>::halfPi,

@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "SequencerGrid.h"
+#include "TuningSelector.h"
 
 //==============================================================================
 /**
@@ -49,6 +50,7 @@ class PolyBoxAudioProcessorEditor : public juce::AudioProcessorEditor
         void connectionChanged(int voice, int channel, bool state) override;
 
         ConnectionMatrix matrix;
+        TuningSelector tuningSelector;
         PolyBoxAudioProcessor& audioProcessor;
     };
 

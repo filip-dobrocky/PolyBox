@@ -27,7 +27,6 @@ public:
 	Note* getLastNotePtr();
 	MidiBuffer getNoteOn(int sample);
 	MidiBuffer getNoteOff(int sample);
-	//void setLength(int length);
 
 	void assignChannel(int channel);
 	void deassignChannel(int channel);

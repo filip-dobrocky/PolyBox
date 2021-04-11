@@ -14,6 +14,7 @@
 #include "PolySequencer.h"
 
 using namespace juce;
+using namespace Tunings;
 
 //==============================================================================
 /**
@@ -59,21 +60,19 @@ public:
     void setStateInformation(const void* data, int sizeInBytes) override;
 
     void loadSample();
-    void loadTuning();
 
     bool syncOn{ false };
     bool canSync();
 
     PolySequencer* getSequencerPtr();
+    Tuning tuning;
 
 private:
-    Synthesiser mSampler;
-    PolySequencer* mSequencer { nullptr };
+    Synthesiser sampler;
+    PolySequencer* sequencer { nullptr };
 
-    AudioFormatManager mFormatManager;
-    AudioFormatReader* mFormatReader { nullptr };
-
-    Tunings::Tuning* mTuning { nullptr };
+    AudioFormatManager formatManager;
+    AudioFormatReader* formatReader { nullptr };
 
     int sampleCounter = 0;
     int clockInterval = 0;

@@ -12,6 +12,8 @@
         <FILE id="mwt86Q" name="SequencerStep.cpp" compile="1" resource="0"
               file="Source/SequencerStep.cpp"/>
         <FILE id="tf3SV1" name="SequencerStep.h" compile="0" resource="0" file="Source/SequencerStep.h"/>
+        <FILE id="Nj4yrt" name="TuningSelector.h" compile="0" resource="0"
+              file="Source/TuningSelector.h"/>
       </GROUP>
       <FILE id="I5vER2" name="Math.h" compile="0" resource="0" file="Source/Math.h"/>
       <FILE id="kblshd" name="Math.cpp" compile="1" resource="0" file="Source/Math.cpp"/>
