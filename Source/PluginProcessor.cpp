@@ -21,11 +21,11 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
                       #endif
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
 #endif
+    tuning(std::make_shared<Tuning>())
 {
     formatManager.registerBasicFormats();
-    //tuning = std::make_shared<Tuning>(new Tuning());
     sequencer = new PolySequencer();
 }
 

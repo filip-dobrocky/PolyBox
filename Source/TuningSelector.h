@@ -18,12 +18,12 @@ using namespace Tunings;
 class TuningSelector : public GroupComponent
 {
 public:
-    TuningSelector(Tuning& t) : tuning(t)
+    TuningSelector(std::shared_ptr<Tuning> t) : tuning(t)
     {
         setText("Tuning");
         setTextLabelPosition(Justification::centred);
-        scl = t.scale;
-        kbm = t.keyboardMapping;
+        scl = t->scale;
+        kbm = t->keyboardMapping;
         sclLabel.setText("Scale: " + scl.name, NotificationType::dontSendNotification);
         kbmLabel.setText("Mapping: " + kbm.name, NotificationType::dontSendNotification);
         sclButton.onClick = [&] { loadScale(); };
@@ -49,7 +49,7 @@ public:
 private:
     Scale scl;
     KeyboardMapping kbm;
-    Tuning& tuning;
+    std::shared_ptr<Tuning> tuning;
     FileChooser sclChooser{ "Load .scl", File::getSpecialLocation(File::userDesktopDirectory), "*.scl" };
     FileChooser kbmChooser{ "Load .kbm", File::getSpecialLocation(File::userDesktopDirectory), "*.kbm" };
 
@@ -63,7 +63,7 @@ private:
         if (sclChooser.browseForFileToOpen())
         {
             scl = readSCLFile(sclChooser.getResult().getFullPathName().toStdString());
-            tuning.scale = scl;
+            tuning = std::make_shared<Tuning>(scl, kbm);
             sclLabel.setText("Scale: " + scl.name, NotificationType::dontSendNotification);
         }
     }
@@ -73,7 +73,7 @@ private:
          if (kbmChooser.browseForFileToOpen())
          {
              kbm = readKBMFile(kbmChooser.getResult().getFullPathName().toStdString());
-             tuning.keyboardMapping = kbm;
+             tuning = std::make_shared<Tuning>(scl, kbm);
              kbmLabel.setText("Mapping: " + kbm.name, NotificationType::dontSendNotification);
          }
     }

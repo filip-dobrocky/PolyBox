@@ -65,7 +65,7 @@ public:
     bool canSync();
 
     PolySequencer* getSequencerPtr();
-    Tuning tuning;
+    std::shared_ptr<Tuning> tuning;
 
 private:
     Synthesiser sampler;
