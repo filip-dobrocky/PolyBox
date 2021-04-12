@@ -26,13 +26,11 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
     tuning(std::make_shared<Tuning>())
 {
     formatManager.registerBasicFormats();
-    sequencer = new PolySequencer();
 }
 
 PolyBoxAudioProcessor::~PolyBoxAudioProcessor()
 {
     delete formatReader;
-    delete sequencer;
 }
 
 //==============================================================================
@@ -98,11 +96,6 @@ bool PolyBoxAudioProcessor::canSync()
     return getPlayHead();
 }
 
-PolySequencer* PolyBoxAudioProcessor::getSequencerPtr()
-{
-    return sequencer;
-}
-
 void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
@@ -111,7 +104,7 @@ void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& ne
 void PolyBoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     sampler.setCurrentPlaybackSampleRate(sampleRate);
-    sequencer->setSampleRate(sampleRate);
+    sequencer.setSampleRate(sampleRate);
 }
 
 void PolyBoxAudioProcessor::releaseResources()
@@ -160,7 +153,7 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         buffer.clear (i, 0, buffer.getNumSamples());
     
     //Sequencer Control
-    auto interval = sequencer->getIntervalInSamples();
+    auto interval = sequencer.getIntervalInSamples();
     if (clockInterval != interval)
     {
         DBG(interval);
@@ -169,10 +162,10 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 
     for (int i = 0; i < buffer.getNumSamples(); i++)
     {
-        if (sequencer->isPlaying())
+        if (sequencer.isPlaying())
         {
             if (sampleCounter++ == 0)
-                sequencer->tick(i);
+                sequencer.tick(i);
             if (sampleCounter >= clockInterval)
                 sampleCounter = 0;
         }
@@ -184,11 +177,11 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 
     midiMessages.clear();
 
-    midiMessages.addEvents(sequencer->midiMessages,
-                           sequencer->midiMessages.getFirstEventTime(),
-                           sequencer->midiMessages.getLastEventTime(), 0);
+    midiMessages.addEvents(sequencer.midiMessages,
+                           sequencer.midiMessages.getFirstEventTime(),
+                           sequencer.midiMessages.getLastEventTime(), 0);
 
-    sequencer->midiMessages.clear();
+    sequencer.midiMessages.clear();
 
     if (syncOn)
     {
@@ -197,8 +190,8 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
             AudioPlayHead::CurrentPositionInfo info;
             if (ph->getCurrentPosition(info))
             {
-                sequencer->setTempo(info.bpm);
-                sequencer->setTimeSignature(info.timeSigNumerator, info.timeSigDenominator);
+                sequencer.setTempo(info.bpm);
+                sequencer.setTimeSignature(info.timeSigNumerator, info.timeSigDenominator);
             }
         }
     }

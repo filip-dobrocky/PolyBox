@@ -3,14 +3,12 @@
 
 using namespace juce;
 //==============================================================================
-SequencerGrid::SequencerGrid(PolySequencer* sequencer)
+SequencerGrid::SequencerGrid(PolySequencer& s) : sequencer(s)
 {
     for (int i = 0; i < NUM_VOICES; i++)
     {
-        addAndMakeVisible(rows[i] = new SequencerRow(sequencer->voices[i], this));
+        addAndMakeVisible(rows[i] = new SequencerRow(sequencer.voices[i], this));
     }
-
-    this->sequencer = sequencer;
 
     noteSlider.setEnabled(selectedStep);
     noteSlider.s.onValueChange = [&] { noteChanged(); };
@@ -102,14 +100,14 @@ void SequencerGrid::probabilityChanged()
 
 void SequencerGrid::togglePlay()
 {
-    if (sequencer->isPlaying())
+    if (sequencer.isPlaying())
     {
-        sequencer->stop();
+        sequencer.stop();
         stopTimer();
     }
     else
     {
-        sequencer->play();
+        sequencer.play();
         startTimer(30);
     }
 }
@@ -117,7 +115,7 @@ void SequencerGrid::togglePlay()
 void SequencerGrid::reset()
 {
     erase();
-    sequencer->reset();
+    sequencer.reset();
 }
 
 void SequencerGrid::erase()
@@ -137,11 +135,8 @@ void SequencerGrid::erase()
             
 }
 
-SequencerGrid::SequencerRow::SequencerRow(SequencerVoice* voice, SequencerGrid* grid)
+SequencerGrid::SequencerRow::SequencerRow(SequencerVoice* v, SequencerGrid* g) : voice(v), grid(g)
 {
-    this->voice = voice;
-    this->grid = grid;
-
     lengthSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
     lengthSlider.setRange(1, 32, 1);
     lengthSlider.setValue(previousLength = voice->getLength());
@@ -174,7 +169,7 @@ void SequencerGrid::SequencerRow::resized()
 
     for (auto step : steps)
     {
-        fb.items.add(FlexItem(*step).withFlex(1)); // withFlex?
+        fb.items.add(FlexItem(*step).withFlex(1));
     }
 
     fbButtons.items.add(FlexItem(lengthSlider).withFlex(1).withMargin(FlexItem::Margin(0, 5, 0, 5)));

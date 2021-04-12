@@ -39,9 +39,10 @@ void PolyBoxAudioProcessorEditor::resized()
 }
 
 
-PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audioProcessor(p)
+PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audioProcessor(p),
+                                                                            sequencer(p.sequencer)
 {
-    sequencerGrid = new SequencerGrid(audioProcessor.getSequencerPtr());
+    sequencerGrid = new SequencerGrid(audioProcessor.sequencer);
     addAndMakeVisible(sequencerGrid);
 
     playButton.setClickingTogglesState(true);
@@ -58,7 +59,7 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
     bpmSlider.setRange(30, 300, 1);
     bpmSlider.setTextValueSuffix(" BPM");
     bpmSlider.onValueChange = [&] { bpmChanged(); };
-    bpmSlider.setValue(p.getSequencerPtr()->getTempo());
+    bpmSlider.setValue(p.sequencer.getTempo());
     addAndMakeVisible(bpmSlider);
 
     if (p.canSync())
@@ -99,7 +100,6 @@ void PolyBoxAudioProcessorEditor::MainPage::resized()
 void PolyBoxAudioProcessorEditor::MainPage::toggleSync()
 {
     const auto state = syncButton.getToggleState();
-    const auto seq = audioProcessor.getSequencerPtr();
     audioProcessor.syncOn = state;
     
     if (!state)
@@ -110,21 +110,21 @@ void PolyBoxAudioProcessorEditor::MainPage::toggleSync()
 
 void PolyBoxAudioProcessorEditor::MainPage::durationChanged()
 {
-    const auto seq = audioProcessor.getSequencerPtr();
-    seq->setDuration(durationSlider.getValue());
+    auto& seq = audioProcessor.sequencer;
+    seq.setDuration(durationSlider.getValue());
 }
 
 void PolyBoxAudioProcessorEditor::MainPage::bpmChanged()
 {
-    const auto seq = audioProcessor.getSequencerPtr();
-    seq->setTempo(bpmSlider.getValue());
+    sequencer.setTempo(bpmSlider.getValue());
 }
 
 PolyBoxAudioProcessorEditor::ConfigPage::ConfigPage(PolyBoxAudioProcessor& p) : audioProcessor(p),
-                                                                                tuningSelector(p.tuning)
+                                                                                tuningSelector(p.tuning),
+                                                                                sequencer(p.sequencer)
 {
     matrix.addListener(this);
-    matrix.initialise(p.getSequencerPtr());
+    matrix.initialise(sequencer);
     addAndMakeVisible(matrix);
     addAndMakeVisible(tuningSelector);
 }
@@ -137,7 +137,7 @@ void PolyBoxAudioProcessorEditor::ConfigPage::resized()
 
 void PolyBoxAudioProcessorEditor::ConfigPage::connectionChanged(int voice, int channel, bool state)
 {
-    auto voicePtr = audioProcessor.getSequencerPtr()->voices[voice];
+    auto voicePtr = sequencer.voices[voice];
     if (state)
         voicePtr->assignChannel(channel);
     else

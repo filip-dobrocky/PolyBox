@@ -64,12 +64,11 @@ public:
     bool syncOn{ false };
     bool canSync();
 
-    PolySequencer* getSequencerPtr();
     std::shared_ptr<Tuning> tuning;
+    PolySequencer sequencer;
 
 private:
     Synthesiser sampler;
-    PolySequencer* sequencer { nullptr };
 
     AudioFormatManager formatManager;
     AudioFormatReader* formatReader { nullptr };

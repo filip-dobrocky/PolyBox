@@ -186,13 +186,13 @@ public:
         }
     }
 
-    void initialise(PolySequencer* s)
+    void initialise(PolySequencer& s)
     {
         for (int i = 0; i < NUM_VOICES; i++)
         {
             for (int j = 0; j < NUM_VOICES; j++)
             {
-                toggles[i][j]->setToggleState(s->voices[i]->hasChannel(j),
+                toggles[i][j]->setToggleState(s.voices[i]->hasChannel(j),
                                               NotificationType::dontSendNotification);
             }
         }

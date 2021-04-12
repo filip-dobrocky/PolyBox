@@ -52,7 +52,7 @@ class SequencerGrid : public juce::Component,
     };
 
 public:
-    SequencerGrid(PolySequencer* sequencer);
+    SequencerGrid(PolySequencer& sequencer);
     ~SequencerGrid() override;
 
     void paint(juce::Graphics&) override;
@@ -65,7 +65,7 @@ public:
     void stepSelected(SequencerStep* step) override;
 
 private:
-    PolySequencer* sequencer;
+    PolySequencer& sequencer;
     SequencerRow* rows[NUM_VOICES];
     SequencerStep* selectedStep{ nullptr };
     NoteSlider noteSlider;

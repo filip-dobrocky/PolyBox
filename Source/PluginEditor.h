@@ -38,6 +38,7 @@ class PolyBoxAudioProcessorEditor : public juce::AudioProcessorEditor
         void bpmChanged();
 
         PolyBoxAudioProcessor& audioProcessor;
+        PolySequencer& sequencer;
     };
 
     struct ConfigPage : Component,
@@ -52,6 +53,7 @@ class PolyBoxAudioProcessorEditor : public juce::AudioProcessorEditor
         ConnectionMatrix matrix;
         TuningSelector tuningSelector;
         PolyBoxAudioProcessor& audioProcessor;
+        PolySequencer& sequencer;
     };
 
 public:
