@@ -66,7 +66,8 @@ public:
 										source, in seconds
 	*/
 	MicroSamplerSound(const String& name,
-		AudioFormatReader& source,
+		AudioFormatReader* source,
+		int midiChannel,
 		const BigInteger& midiNotes,
 		double frequencyForNormalPitch,
 		double attackTimeSecs,
@@ -103,6 +104,7 @@ private:
 	BigInteger midiNotes;
 	int length = 0;
 	double rootFrequency = 0;
+	int channel;
 
 	ADSR::Parameters params;
 
@@ -124,7 +126,7 @@ class MicroSamplerVoice : public SynthesiserVoice
 public:
 	//==============================================================================
 	/** Creates a SamplerVoice. */
-	MicroSamplerVoice(Tunings::Tuning* tuning);
+	MicroSamplerVoice(Tunings::Tuning& tuning);
 
 	/** Destructor. */
 	~MicroSamplerVoice();
@@ -148,7 +150,7 @@ private:
 
 	ADSR adsr;
 
-	Tunings::Tuning* tuning;
+	Tunings::Tuning& tuning;
 
 	JUCE_LEAK_DETECTOR(MicroSamplerVoice)
 };

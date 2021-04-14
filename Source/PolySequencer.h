@@ -54,5 +54,4 @@ private:
 	int calculateSteps();
 	void lengthChanged();
 	bool shouldPlay(SequencerVoice* v);
-	bool shouldStop(SequencerVoice* v);
 };

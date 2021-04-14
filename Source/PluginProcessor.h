@@ -66,13 +66,9 @@ public:
 
     std::shared_ptr<Tuning> tuning;
     PolySequencer sequencer;
-
-private:
     Synthesiser sampler;
 
-    AudioFormatManager formatManager;
-    AudioFormatReader* formatReader { nullptr };
-
+private:
     int sampleCounter = 0;
     int clockInterval = 0;
 

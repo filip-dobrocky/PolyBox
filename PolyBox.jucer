@@ -6,6 +6,7 @@
     <GROUP id="{2D0F0B3F-8B7D-E054-09F8-0D254D316DFE}" name="Source">
       <GROUP id="{036A4BC2-D9B4-688C-8BA3-CA814C7525C2}" name="GUI">
         <FILE id="VtocFV" name="Components.h" compile="0" resource="0" file="Source/Components.h"/>
+        <FILE id="fvPE0x" name="SampleSource.h" compile="0" resource="0" file="Source/SampleSource.h"/>
         <FILE id="iMEjVl" name="SequencerGrid.cpp" compile="1" resource="0"
               file="Source/SequencerGrid.cpp"/>
         <FILE id="zrep2F" name="SequencerGrid.h" compile="0" resource="0" file="Source/SequencerGrid.h"/>

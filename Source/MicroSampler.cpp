@@ -23,29 +23,33 @@
 #include "MicroSampler.h"
 
 MicroSamplerSound::MicroSamplerSound(const String& soundName,
-	AudioFormatReader& source,
+	AudioFormatReader* source,
+	int midiChannel,
 	const BigInteger& notes,
 	double frequencyForNormalPitch,
 	double attackTimeSecs,
 	double releaseTimeSecs,
 	double maxSampleLengthSeconds)
 	: name(soundName),
-	sourceSampleRate(source.sampleRate),
+	sourceSampleRate(source->sampleRate),
 	midiNotes(notes),
-	rootFrequency(frequencyForNormalPitch)
+	rootFrequency(frequencyForNormalPitch),
+	channel(midiChannel)
 {
-	if (sourceSampleRate > 0 && source.lengthInSamples > 0)
+	if (sourceSampleRate > 0 && source->lengthInSamples > 0)
 	{
-		length = jmin((int)source.lengthInSamples,
+		length = jmin((int)source->lengthInSamples,
 			(int)(maxSampleLengthSeconds * sourceSampleRate));
 
-		data.reset(new AudioBuffer<float>(jmin(2, (int)source.numChannels), length + 4));
+		data.reset(new AudioBuffer<float>(jmin(2, (int)source->numChannels), length + 4));
 
-		source.read(data.get(), 0, length + 4, 0, true, true);
+		source->read(data.get(), 0, length + 4, 0, true, true);
 
 		params.attack = static_cast<float> (attackTimeSecs);
 		params.release = static_cast<float> (releaseTimeSecs);
 	}
+
+	delete source;
 }
 
 MicroSamplerSound::~MicroSamplerSound()
@@ -57,13 +61,13 @@ bool MicroSamplerSound::appliesToNote(int midiNoteNumber)
 	return midiNotes[midiNoteNumber];
 }
 
-bool MicroSamplerSound::appliesToChannel(int /*midiChannel*/)
+bool MicroSamplerSound::appliesToChannel(int midiChannel)
 {
-	return true;
+	return channel == midiChannel;
 }
 
 //==============================================================================
-MicroSamplerVoice::MicroSamplerVoice(Tunings::Tuning* tuning) : tuning(tuning) {}
+MicroSamplerVoice::MicroSamplerVoice(Tunings::Tuning& tuning) : tuning(tuning) {}
 MicroSamplerVoice::~MicroSamplerVoice() {}
 
 bool MicroSamplerVoice::canPlaySound(SynthesiserSound* sound)
@@ -75,7 +79,7 @@ void MicroSamplerVoice::startNote(int midiNoteNumber, float velocity, Synthesise
 {
 	if (auto* sound = dynamic_cast<const MicroSamplerSound*> (s))
 	{
-		pitchRatio = (tuning->frequencyForMidiNote(midiNoteNumber) / sound->rootFrequency)
+		pitchRatio = (tuning.frequencyForMidiNote(midiNoteNumber) / sound->rootFrequency)
 			* sound->sourceSampleRate / getSampleRate();
 
 		sourceSamplePosition = 0.0;

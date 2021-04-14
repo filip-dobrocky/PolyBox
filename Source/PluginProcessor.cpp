@@ -25,12 +25,12 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
 #endif
     tuning(std::make_shared<Tuning>())
 {
-    formatManager.registerBasicFormats();
+    for (int i = 0; i < NUM_VOICES; i++)
+        sampler.addVoice(new MicroSamplerVoice(*tuning));
 }
 
 PolyBoxAudioProcessor::~PolyBoxAudioProcessor()
 {
-    delete formatReader;
 }
 
 //==============================================================================
@@ -222,20 +222,6 @@ void PolyBoxAudioProcessor::setStateInformation (const void* data, int sizeInByt
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-}
-
-void PolyBoxAudioProcessor::loadSample()
-{
-    FileChooser chooser { "Load sample", File::getSpecialLocation(File::userDesktopDirectory), "*.wav; *.mp3" };
-    if (chooser.browseForFileToOpen())
-    {
-        auto file = chooser.getResult();
-        formatReader = formatManager.createReaderFor(file);
-
-        BigInteger range;
-        range.setRange(0, 128, true);
-        sampler.addSound(new MicroSamplerSound("sample", *formatReader, range, 262, 0.1, 0.3, 10));
-    }
 }
 
 //==============================================================================

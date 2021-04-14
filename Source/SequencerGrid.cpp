@@ -33,7 +33,6 @@ SequencerGrid::~SequencerGrid()
 
 void SequencerGrid::paint (juce::Graphics& g)
 {
-    //g.fillAll(Colours::aquamarine);
 }
 
 void SequencerGrid::resized()
@@ -159,7 +158,6 @@ SequencerGrid::SequencerRow::~SequencerRow()
 
 void SequencerGrid::SequencerRow::paint(juce::Graphics& g)
 {
-    //g.fillAll(Colours::aquamarine);
 }
 
 void SequencerGrid::SequencerRow::resized()

@@ -2056,6 +2056,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\Source\Components.h"/>
+    <ClInclude Include="..\..\Source\SampleSource.h"/>
     <ClInclude Include="..\..\Source\SequencerGrid.h"/>
     <ClInclude Include="..\..\Source\SequencerStep.h"/>
     <ClInclude Include="..\..\Source\TuningSelector.h"/>
