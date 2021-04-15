@@ -40,7 +40,8 @@ void PolyBoxAudioProcessorEditor::resized()
 
 
 PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audioProcessor(p),
-                                                                            sequencer(p.sequencer)
+                                                                            sequencer(p.sequencer),
+                                                                            samplerComponent(p.sampler)
 {
     sequencerGrid = new SequencerGrid(audioProcessor.sequencer);
     addAndMakeVisible(sequencerGrid);
@@ -74,8 +75,7 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
     durationSlider.onValueChange = [&] { durationChanged(); };
     addAndMakeVisible(durationSlider);
 
-    for (int i = 0; i < NUM_VOICES; i++)
-        addAndMakeVisible(samples.add(new SampleSource(p.sampler, i + 1)));
+    addAndMakeVisible(samplerComponent);
 }
 
 PolyBoxAudioProcessorEditor::MainPage::~MainPage()
@@ -98,12 +98,7 @@ void PolyBoxAudioProcessorEditor::MainPage::resized()
     auto bounds = getLocalBounds();
     topBarFb.performLayout(bounds.removeFromTop(50));
     
-    FlexBox samplesFb;
-    samplesFb.flexDirection = FlexBox::Direction::column;
-    for (auto s : samples)
-        samplesFb.items.add(FlexItem(*s).withFlex(1));
-    samplesFb.performLayout(bounds.removeFromRight(getWidth() / 4));
-    
+    samplerComponent.setBounds(bounds.removeFromRight(getWidth()/4));
     sequencerGrid->setBounds(bounds);
 }
    

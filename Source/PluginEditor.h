@@ -12,7 +12,7 @@
 #include "PluginProcessor.h"
 #include "SequencerGrid.h"
 #include "TuningSelector.h"
-#include "SampleSource.h"
+#include "SamplerComponent.h"
 
 //==============================================================================
 /**
@@ -27,13 +27,13 @@ class PolyBoxAudioProcessorEditor : public juce::AudioProcessorEditor
         void resized() override;
 
         SequencerGrid* sequencerGrid;
-        OwnedArray<SampleSource> samples;
 
         TextButton playButton{ "Play" };
         TextButton resetButton{ "Reset" };
         Slider bpmSlider;
         ToggleButton syncButton;
         DurationSlider durationSlider;
+        SamplerComponent samplerComponent;
 
         void toggleSync();
         void durationChanged();

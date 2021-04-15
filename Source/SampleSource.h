@@ -17,18 +17,18 @@
 /*
 */
 class SampleSource : public Component,
-                     public FileDragAndDropTarget,
-                     public ChangeListener
+    public FileDragAndDropTarget,
+    public ChangeListener
 {
 public:
     SampleSource(Synthesiser& s, int ch) : audioThumbnailCache(5),
-                                           audioThumbnail(512, formatManager, audioThumbnailCache),
-                                           channel(ch),
-                                           sampler(s),
-                                           attackTime(0.1),
-                                           releaseTime(0.3),
-                                           sampleLength(10),
-                                           rootFrequency(262)
+        audioThumbnail(512, formatManager, audioThumbnailCache),
+        channel(ch),
+        sampler(s),
+        attackTime(0.1),
+        releaseTime(0.3),
+        sampleLength(10),
+        rootFrequency(262)
     {
         formatManager.registerBasicFormats();
         audioThumbnail.addChangeListener(this);
@@ -40,6 +40,13 @@ public:
 
     void paint(Graphics& g) override
     {
+        if (selected)
+        {
+            g.setColour(juce::Colours::white);
+            g.setOpacity(0.1);
+            g.fillAll();
+        }
+
         g.setColour(juce::Colours::white);
         g.setFont(14.0f);
 
@@ -56,7 +63,7 @@ public:
         else
         {
             g.drawText("Sample " + String(channel), getLocalBounds(),
-                       juce::Justification::centred, true);
+                juce::Justification::centred, true);
         }
     }
 
@@ -102,9 +109,15 @@ public:
         drag = false;
     }
 
-    void mouseDown(const MouseEvent& event)
+    void mouseDown(const MouseEvent& event) override
     {
         if (event.mouseWasClicked() && event.mods.isLeftButtonDown())
+            callSampleSelectedListeners();
+    }
+
+    void mouseDoubleClick(const MouseEvent& event) override
+    {
+        if (event.mods.isLeftButtonDown())
             chooseFile();
     }
 
@@ -119,6 +132,19 @@ public:
     double releaseTime;
     double sampleLength;
     double rootFrequency;
+    bool selected{ false };
+
+    class JUCE_API  Listener
+    {
+    public:
+        virtual ~Listener() = default;
+
+        virtual void sampleSelected(SampleSource* sample) = 0;
+    };
+
+    void addListener(Listener* l) { listeners.add(l); }
+
+    void removeListener(Listener* l) { listeners.remove(l); }
 
 private:
     void chooseFile()
@@ -159,6 +185,13 @@ private:
     SynthesiserSound* sound{ nullptr };
 
     bool drag{ false };
+
+    ListenerList<Listener> listeners;
+    void callSampleSelectedListeners()
+    {
+        Component::BailOutChecker checker(this);
+        listeners.callChecked(checker, [this](Listener& l) { l.sampleSelected(this); });
+    }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SampleSource)
 };

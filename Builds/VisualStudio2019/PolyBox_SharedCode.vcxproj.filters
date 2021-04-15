@@ -2511,6 +2511,9 @@
     <ClInclude Include="..\..\Source\Components.h">
       <Filter>PolyBox\Source\GUI</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\Source\SamplerComponent.h">
+      <Filter>PolyBox\Source\GUI</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\Source\SampleSource.h">
       <Filter>PolyBox\Source\GUI</Filter>
     </ClInclude>

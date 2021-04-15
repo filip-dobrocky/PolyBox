@@ -36,6 +36,7 @@ float PolySequencer::getTimeSignature() { return (float)timeSignature.a / (float
 void PolySequencer::setTempo(int tempo) 
 {
 	this->tempo = tempo;
+	//steps = calculateSteps();
 }
 
 void PolySequencer::setDuration(int duration)
@@ -52,7 +53,7 @@ void PolySequencer::setTimeSignature(int a, int b)
 int PolySequencer::getIntervalInSamples()
 {
 	int interval = sampleRate * (((240.0f / (double)tempo) * duration * (double)timeSignature.a / (double)timeSignature.b) / (double)steps);
-	return interval;
+	return (interval > 0) ? interval : 1;
 }
 
 void PolySequencer::lengthChanged()

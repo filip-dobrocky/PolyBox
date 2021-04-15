@@ -196,7 +196,7 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         }
     }
 
-    //sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 }
 
 //==============================================================================

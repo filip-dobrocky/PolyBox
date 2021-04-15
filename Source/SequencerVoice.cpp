@@ -29,11 +29,6 @@ int SequencerVoice::getLength()
 	return sequence.size();
 }
 
-/*void SequencerVoice::setLength(int length)
-{
-	sequence.resize(length);
-}*/
-
 int SequencerVoice::getPosition()
 {
 	return position;
