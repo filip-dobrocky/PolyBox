@@ -38,28 +38,42 @@ public:
     {
         if (selected)
         {
-            g.setColour(juce::Colours::white);
+            g.setColour(Colours::white);
             g.setOpacity(0.1);
             g.fillAll();
         }
 
-        g.setColour(juce::Colours::white);
+        g.setColour(Colours::white);
         g.setFont(14.0f);
 
         if (drag)
         {
-            g.drawText("Drop sample", getLocalBounds(),
-                juce::Justification::centred, true);
+            g.drawText("Drop sample", getLocalBounds(), Justification::centred, true);
         }
         else if (sound)
         {
-            g.setColour(juce::Colours::aquamarine);
-            audioThumbnail.drawChannel(g, getLocalBounds(), 0, audioThumbnail.getTotalLength(), 0, 1.0f);
+            auto bounds = getLocalBounds();
+            g.setColour(Colours::aquamarine);
+            const auto start = sound->getStart();
+            const auto end = sound->getEnd();
+            const auto length = audioThumbnail.getTotalLength();
+            
+            g.setOpacity(0.3);
+            if (start)
+            {
+                audioThumbnail.drawChannel(g, bounds.removeFromLeft(getWidth() * start), 0, start * length, 0, 1.0f);
+            }
+            if (end < 1)
+            {
+                audioThumbnail.drawChannel(g, bounds.removeFromRight(getWidth() * (1 - end)), end * length, length, 0, 1.0f);
+            }
+
+            g.setOpacity(1);
+            audioThumbnail.drawChannel(g, bounds, start * length, end * length, 0, 1.0f);
         }
         else
         {
-            g.drawText("Sample " + String(channel), getLocalBounds(),
-                juce::Justification::centred, true);
+            g.drawText("Sample " + String(channel), getLocalBounds(), Justification::centred, true);
         }
     }
 
@@ -73,7 +87,7 @@ public:
         for (auto f : files)
         {
             f = f.toLowerCase();
-            if (f.contains(".wav") || f.contains(".mp3") || f.contains(".aif"))
+            if (f.contains(".wav") || f.contains(".mp3") || f.contains(".aif") || f.contains(".flac"))
                 return true;
         }
 
@@ -146,7 +160,7 @@ public:
 private:
     void chooseFile()
     {
-        FileChooser chooser{ "Load sample", File::getSpecialLocation(File::userDesktopDirectory), "*.wav; *.mp3; *.aif" };
+        FileChooser chooser{ "Load sample", File::getSpecialLocation(File::userDesktopDirectory), "*.wav; *.mp3; *.aif; *.flac" };
         if (chooser.browseForFileToOpen())
         {
             auto file = chooser.getResult();
@@ -156,25 +170,28 @@ private:
 
     void loadSample(File f)
     {
-        const auto name = "s" + channel;
-        for (int i = 0; i < sampler.getNumSounds(); i++)
+        if (auto reader = formatManager.createReaderFor(f))
         {
-            if (sampler.getSound(i) == sound)
+            const auto name = "s" + channel;
+            for (int i = 0; i < sampler.getNumSounds(); i++)
             {
-                sampler.removeSound(i);
+                if (sampler.getSound(i) == sound)
+                {
+                    sampler.removeSound(i);
+                }
             }
+
+            BigInteger range;
+            range.setRange(0, 128, true);
+
+            sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(new MicroSamplerSound(name, reader, channel, range,
+                                                                      262, 0.1, 0.2)));
+
+            audioThumbnail.setSource(new FileInputSource(f));
+            repaint();
+
+            callSampleSelectedListeners();
         }
-
-        BigInteger range;
-        range.setRange(0, 128, true);
-        auto reader = formatManager.createReaderFor(f);
-        sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(new MicroSamplerSound(name, reader, channel, range, 
-                                                                  262, 0.1, 0.2)));
-
-        audioThumbnail.setSource(new FileInputSource(f));
-        repaint();
-
-        callSampleSelectedListeners();
     }
 
     AudioFormatManager formatManager;

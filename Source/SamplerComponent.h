@@ -141,6 +141,7 @@ private:
     {
         selectedSample->sound->setStart(timeSlider.getMinValue());
         selectedSample->sound->setEnd(timeSlider.getMaxValue());
+        selectedSample->repaint();
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SamplerComponent)
