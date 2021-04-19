@@ -51,7 +51,7 @@ void SequencerGrid::resized()
     }
 
     auto area = getLocalBounds();
-    fbSliders.performLayout(area.removeFromBottom(getHeight() * 0.15).toFloat());
+    fbSliders.performLayout(area.removeFromBottom(80).toFloat());
     fbGrid.performLayout(area.toFloat());
 }
 

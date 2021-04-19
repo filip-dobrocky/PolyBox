@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "SampleSource.h"
 #include "PolySequencer.h"
+#include "Components.h"
 
 //==============================================================================
 /*
@@ -30,18 +31,12 @@ public:
             addAndMakeVisible(samples.add(sample));
         }
 
-        frequencySlider.setSliderStyle(Slider::SliderStyle::LinearBar);
-
-        attackSlider.setRange(0.0f, 2.0f);
-        releaseSlider.setRange(0.0f, 2.0f);
         timeSlider.setRange(0.0f, 1.0f);
-        frequencySlider.setRange(20, 5000);
-        frequencySlider.setTextValueSuffix(" Hz");
         setSlidersEnabled(false);
 
-        attackSlider.onValueChange = [&] { attackChanged(); };
-        releaseSlider.onValueChange = [&] { releaseChanged(); };
-        frequencySlider.onValueChange = [&] { frequencyChanged(); };
+        attackSlider.s.onValueChange = [&] { attackChanged(); };
+        releaseSlider.s.onValueChange = [&] { releaseChanged(); };
+        frequencySlider.s.onValueChange = [&] { frequencyChanged(); };
         timeSlider.onValueChange = [&] { timeChanged(); };
 
         addAndMakeVisible(attackSlider);
@@ -72,8 +67,8 @@ public:
         controlFb.items.add(FlexItem(releaseSlider).withFlex(0.5));
 
         auto bounds = getLocalBounds();
-        timeSlider.setBounds(bounds.removeFromBottom(10));
-        controlFb.performLayout(bounds.removeFromBottom(30));
+        timeSlider.setBounds(bounds.removeFromBottom(25).reduced(5));
+        controlFb.performLayout(bounds.removeFromBottom(55).reduced(5));
         samplesFb.performLayout(bounds);
     }
 
@@ -104,10 +99,11 @@ private:
     OwnedArray<SampleSource> samples;
     SampleSource* selectedSample{ nullptr };
 
-    Slider attackSlider{ Slider::SliderStyle::RotaryHorizontalVerticalDrag, Slider::NoTextBox};
-    Slider releaseSlider{ Slider::SliderStyle::RotaryHorizontalVerticalDrag, Slider::NoTextBox };
-    Slider timeSlider{ Slider::SliderStyle::TwoValueHorizontal, Slider::NoTextBox};
-    Slider frequencySlider;
+    FloatSlider attackSlider{ "Attack", true, 0.0f, 2.0f};
+    FloatSlider releaseSlider{ "Release", true, 0.0f, 2.0f };
+
+    Slider timeSlider{ Slider::SliderStyle::TwoValueHorizontal, Slider::NoTextBox };
+    FrequencySlider frequencySlider;
 
     void setSlidersEnabled(bool enabled)
     {
@@ -119,26 +115,26 @@ private:
 
     void setSliderValues(SampleSource* sample)
     {
-        attackSlider.setValue(sample->sound->getAttack());
-        releaseSlider.setValue(sample->sound->getRelease());
+        attackSlider.s.setValue(sample->sound->getAttack());
+        releaseSlider.s.setValue(sample->sound->getRelease());
         timeSlider.setMinValue(sample->sound->getStart());
         timeSlider.setMaxValue(sample->sound->getEnd());
-        frequencySlider.setValue(sample->sound->getRoot());
+        frequencySlider.s.setValue(sample->sound->getRoot());
     }
 
     void attackChanged()
     {
-        selectedSample->sound->setAttack(attackSlider.getValue());
+        selectedSample->sound->setAttack(attackSlider.s.getValue());
     }
 
     void releaseChanged()
     {
-        selectedSample->sound->setRelease(releaseSlider.getValue());
+        selectedSample->sound->setRelease(releaseSlider.s.getValue());
     }
 
     void frequencyChanged()
     {
-        selectedSample->sound->setRoot(frequencySlider.getValue());
+        selectedSample->sound->setRoot(frequencySlider.s.getValue());
     }
 
     void timeChanged()

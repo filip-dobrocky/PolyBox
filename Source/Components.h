@@ -19,6 +19,13 @@ class NoteSlider : public Component
             else
                 return String(value);
         }
+
+        double getValueFromText(const String& text) override
+        {
+            return text.isNotEmpty() && text.containsOnly("0123456789.,-")
+                 ? Slider::getValueFromText(text)
+                 : -1;
+        }
     };
 
 public:
@@ -50,17 +57,19 @@ class FloatSlider : public Component
         CustomSlider()
         {
             setSliderStyle(Slider::LinearBar);
-            setRange(0.0f, 1.0f);
-            setNumDecimalPlacesToDisplay(2);
         }
     };
 
 public:
-    FloatSlider(String parameter)
+    FloatSlider(String parameter, bool centered, double min, double max)
     {
         addAndMakeVisible(s);
         addAndMakeVisible(l);
+        s.setRange(min, max);
+        s.setNumDecimalPlacesToDisplay(2);
         l.setText(parameter, juce::dontSendNotification);
+        l.setJustificationType(centered ? Justification::centred
+                                        : Justification::centredLeft);
     }
 
     void resized() override
@@ -75,6 +84,94 @@ public:
 private:
     Label l;
 };
+
+class FrequencySlider : public Component
+{
+    class CustomSlider : public Slider
+    {
+    public:
+        CustomSlider()
+        {
+            setSliderStyle(Slider::LinearBar);
+            setRange(24.5f, 1046.5f);
+            setNumDecimalPlacesToDisplay(2);
+            setSkewFactorFromMidPoint(262);
+        }
+
+        double snapValue(double attemptedValue, DragMode dragMode) override
+        {
+            if (dragMode == notDragging)
+                return attemptedValue;
+
+            auto f = attemptedValue / cFreq;
+            int note = 0;
+
+            while (f / halfStep >= 1)
+            {
+                f /= halfStep;
+                note++;
+            }
+
+            return 440 * std::pow(2, (note - 57) / 12.0f);
+        }
+
+        String 	getTextFromValue(double value) override
+        {
+            int note = 0;
+            auto f = value / cFreq;
+            
+            while (f / halfStep >= 1)
+            {
+                f /= halfStep;
+                note++;
+            }
+
+            return notes[note % 12] + String(note / 12) + " (" + String(value) + " Hz)";
+        }
+
+        double getValueFromText(const String& text) override
+        {
+            for (int i = 0; i < 12; i++)
+            {
+                auto octave = text.fromFirstOccurrenceOf(notes[i], false, true);
+                if (octave.isNotEmpty())
+                {
+                    int note = i + 12 * octave.getIntValue();
+                    return 440 * std::pow(2, (note - 57) / 12.0f);
+                }
+            }
+
+            return Slider::getValueFromText(text);
+        }
+
+    private:
+        const double cFreq = 16.35f;
+        const double halfStep = 1.05946f;
+        const String notes[12]{ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+    };
+
+public:
+    FrequencySlider()
+    {
+        addAndMakeVisible(s);
+        addAndMakeVisible(l);
+        l.setText("Root", juce::dontSendNotification);
+        l.setJustificationType(Justification::centred);
+    }
+
+    void resized() override
+    {
+        auto bounds = getLocalBounds();
+        l.setBounds(bounds.removeFromTop(20));
+        s.setBounds(bounds);
+    }
+
+    CustomSlider s;
+
+private:
+    Label l;
+};
+
 
 class DurationSlider : public Slider
 {

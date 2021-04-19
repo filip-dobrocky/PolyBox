@@ -69,8 +69,8 @@ private:
     SequencerRow* rows[NUM_VOICES];
     SequencerStep* selectedStep{ nullptr };
     NoteSlider noteSlider;
-    FloatSlider velocitySlider{ "Velocity" };
-    FloatSlider probabilitySlider{ "Probability" };
+    FloatSlider velocitySlider{ "Velocity", false, 0.0f, 1.0f };
+    FloatSlider probabilitySlider{ "Probability", false, 0.0f, 1.0f };
 
     void noteChanged();
     void velocityChanged();

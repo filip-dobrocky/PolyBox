@@ -71,8 +71,11 @@ public:
     bool isInterestedInFileDrag(const StringArray& files) override
     {
         for (auto f : files)
+        {
+            f = f.toLowerCase();
             if (f.contains(".wav") || f.contains(".mp3") || f.contains(".aif"))
                 return true;
+        }
 
         return false;
     }

@@ -132,7 +132,7 @@ void MicroSamplerVoice::startNote(int midiNoteNumber, float velocity, Synthesise
 		pitchRatio = (tuning.frequencyForMidiNote(midiNoteNumber) / sound->rootFrequency)
 			* sound->sourceSampleRate / getSampleRate();
 
-		sourceSamplePosition = 0.0;
+		sourceSamplePosition = sound->startSample;
 		lgain = velocity;
 		rgain = velocity;
 
@@ -172,8 +172,8 @@ void MicroSamplerVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int st
 		const float* const inL = data.getReadPointer(0);
 		const float* const inR = data.getNumChannels() > 1 ? data.getReadPointer(1) : nullptr;
 
-		float* outL = outputBuffer.getWritePointer(0, playingSound->startSample + startSample);
-		float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer(1, playingSound->startSample + startSample) : nullptr;
+		float* outL = outputBuffer.getWritePointer(0, startSample);
+		float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer(1, startSample) : nullptr;
 
 		while (--numSamples >= 0)
 		{
