@@ -22,13 +22,9 @@ class SampleSource : public Component,
 {
 public:
     SampleSource(Synthesiser& s, int ch) : audioThumbnailCache(5),
-        audioThumbnail(512, formatManager, audioThumbnailCache),
-        channel(ch),
-        sampler(s),
-        attackTime(0.1),
-        releaseTime(0.3),
-        sampleLength(10),
-        rootFrequency(262)
+                                           audioThumbnail(512, formatManager, audioThumbnailCache),
+                                           channel(ch),
+                                           sampler(s)
     {
         formatManager.registerBasicFormats();
         audioThumbnail.addChangeListener(this);
@@ -128,10 +124,7 @@ public:
     }
 
     const int channel;
-    double attackTime;
-    double releaseTime;
-    double sampleLength;
-    double rootFrequency;
+    MicroSamplerSound* sound{ nullptr };
     bool selected{ false };
 
     class JUCE_API  Listener
@@ -145,6 +138,7 @@ public:
     void addListener(Listener* l) { listeners.add(l); }
 
     void removeListener(Listener* l) { listeners.remove(l); }
+
 
 private:
     void chooseFile()
@@ -171,18 +165,19 @@ private:
         BigInteger range;
         range.setRange(0, 128, true);
         auto reader = formatManager.createReaderFor(f);
-        sound = sampler.addSound(new MicroSamplerSound(name, reader, channel, range, 
-                                                       rootFrequency, attackTime, releaseTime, sampleLength));
+        sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(new MicroSamplerSound(name, reader, channel, range, 
+                                                                  262, 0.1, 0.2)));
 
         audioThumbnail.setSource(new FileInputSource(f));
         repaint();
+
+        callSampleSelectedListeners();
     }
 
     AudioFormatManager formatManager;
     AudioThumbnailCache audioThumbnailCache;
     AudioThumbnail audioThumbnail;
     Synthesiser& sampler;
-    SynthesiserSound* sound{ nullptr };
 
     bool drag{ false };
 

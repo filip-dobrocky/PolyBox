@@ -28,8 +28,7 @@ MicroSamplerSound::MicroSamplerSound(const String& soundName,
 	const BigInteger& notes,
 	double frequencyForNormalPitch,
 	double attackTimeSecs,
-	double releaseTimeSecs,
-	double maxSampleLengthSeconds)
+	double releaseTimeSecs)
 	: name(soundName),
 	sourceSampleRate(source->sampleRate),
 	midiNotes(notes),
@@ -38,12 +37,11 @@ MicroSamplerSound::MicroSamplerSound(const String& soundName,
 {
 	if (sourceSampleRate > 0 && source->lengthInSamples > 0)
 	{
-		length = jmin((int)source->lengthInSamples,
-			(int)(maxSampleLengthSeconds * sourceSampleRate));
+		endSample = source->lengthInSamples;
 
-		data.reset(new AudioBuffer<float>(jmin(2, (int)source->numChannels), length + 4));
+		data.reset(new AudioBuffer<float>(jmin(2, (int)source->numChannels), endSample + 4));
 
-		source->read(data.get(), 0, length + 4, 0, true, true);
+		source->read(data.get(), 0, endSample + 4, 0, true, true);
 
 		params.attack = static_cast<float> (attackTimeSecs);
 		params.release = static_cast<float> (releaseTimeSecs);
@@ -64,6 +62,58 @@ bool MicroSamplerSound::appliesToNote(int midiNoteNumber)
 bool MicroSamplerSound::appliesToChannel(int midiChannel)
 {
 	return channel == midiChannel;
+}
+
+void MicroSamplerSound::setAttack(double a)
+{
+	params.attack = a;
+}
+
+void MicroSamplerSound::setRelease(double r)
+{
+	params.release = r;
+}
+
+void MicroSamplerSound::setStart(double s)
+{
+	startSample = static_cast<int>(data->getNumSamples() * s);
+	start = s;
+}
+
+void MicroSamplerSound::setEnd(double e)
+{
+	endSample = static_cast<int>(data->getNumSamples() * e);
+	end = e;
+}
+
+void MicroSamplerSound::setRoot(double frequency)
+{
+	rootFrequency = frequency;
+}
+
+double MicroSamplerSound::getAttack()
+{
+	return params.attack;
+}
+
+double MicroSamplerSound::getRelease()
+{
+	return params.release;
+}
+
+double MicroSamplerSound::getStart()
+{
+	return start;
+}
+
+double MicroSamplerSound::getEnd()
+{
+	return end;
+}
+
+double MicroSamplerSound::getRoot()
+{
+	return rootFrequency;
 }
 
 //==============================================================================
@@ -122,8 +172,8 @@ void MicroSamplerVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int st
 		const float* const inL = data.getReadPointer(0);
 		const float* const inR = data.getNumChannels() > 1 ? data.getReadPointer(1) : nullptr;
 
-		float* outL = outputBuffer.getWritePointer(0, startSample);
-		float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer(1, startSample) : nullptr;
+		float* outL = outputBuffer.getWritePointer(0, playingSound->startSample + startSample);
+		float* outR = outputBuffer.getNumChannels() > 1 ? outputBuffer.getWritePointer(1, playingSound->startSample + startSample) : nullptr;
 
 		while (--numSamples >= 0)
 		{
@@ -153,7 +203,7 @@ void MicroSamplerVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int st
 
 			sourceSamplePosition += pitchRatio;
 
-			if (sourceSamplePosition > playingSound->length)
+			if (sourceSamplePosition > playingSound->endSample)
 			{
 				stopNote(0.0f, false);
 				break;

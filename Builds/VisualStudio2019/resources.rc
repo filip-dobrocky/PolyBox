@@ -15,6 +15,7 @@ BEGIN
   BEGIN
     BLOCK "040904E4"
     BEGIN
+      VALUE "CompanyName",  "Filip Dobrocky\0"
       VALUE "FileDescription",  "PolyBox\0"
       VALUE "FileVersion",  "1.0.0\0"
       VALUE "ProductName",  "PolyBox\0"

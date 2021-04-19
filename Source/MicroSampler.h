@@ -71,8 +71,7 @@ public:
 		const BigInteger& midiNotes,
 		double frequencyForNormalPitch,
 		double attackTimeSecs,
-		double releaseTimeSecs,
-		double maxSampleLengthSeconds);
+		double releaseTimeSecs);
 
 	/** Destructor. */
 	~MicroSamplerSound();
@@ -94,6 +93,18 @@ public:
 	bool appliesToNote(int midiNoteNumber) override;
 	bool appliesToChannel(int midiChannel) override;
 
+	void setAttack(double a);
+	void setRelease(double r);
+	void setStart(double s);
+	void setEnd(double e);
+	void setRoot(double frequency);
+
+	double getAttack();
+	double getRelease();
+	double getStart();
+	double getEnd();
+	double getRoot();
+
 private:
 	//==============================================================================
 	friend class MicroSamplerVoice;
@@ -102,7 +113,10 @@ private:
 	std::unique_ptr<AudioBuffer<float>> data;
 	double sourceSampleRate;
 	BigInteger midiNotes;
-	int length = 0;
+	int startSample = 0;
+	int endSample = 0;
+	double start = 0.0f;
+	double end = 1.0f;
 	double rootFrequency = 0;
 	int channel;
 
