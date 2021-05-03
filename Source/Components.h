@@ -51,20 +51,12 @@ private:
 
 class FloatSlider : public Component
 {
-    class CustomSlider : public Slider
-    {
-    public:
-        CustomSlider()
-        {
-            setSliderStyle(Slider::LinearBar);
-        }
-    };
-
 public:
-    FloatSlider(String parameter, bool centered, double min, double max)
+    FloatSlider(String parameter, Slider::SliderStyle style, bool centered, double min, double max)
     {
         addAndMakeVisible(s);
         addAndMakeVisible(l);
+        s.setSliderStyle(style);
         s.setRange(min, max);
         s.setNumDecimalPlacesToDisplay(2);
         l.setText(parameter, juce::dontSendNotification);
@@ -79,9 +71,7 @@ public:
         s.setBounds(bounds);
     }
 
-    CustomSlider s;
-
-private:
+    Slider s;
     Label l;
 };
 

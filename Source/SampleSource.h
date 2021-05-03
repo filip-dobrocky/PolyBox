@@ -28,6 +28,14 @@ public:
     {
         formatManager.registerBasicFormats();
         audioThumbnail.addChangeListener(this);
+        addChildComponent(panKnob);
+        addChildComponent(gainKnob);
+        panKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
+        gainKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
+        panKnob.s.setDoubleClickReturnValue(true, 0.0f);
+        gainKnob.s.setDoubleClickReturnValue(true, 1.0f);
+        panKnob.s.onValueChange = [&] { updatePan(); };
+        gainKnob.s.onValueChange = [&] { updateGain(); };
     }
 
     ~SampleSource() override
@@ -41,6 +49,8 @@ public:
             g.setColour(Colours::white);
             g.setOpacity(0.1);
             g.fillAll();
+            panKnob.setVisible(selected && sound);
+            gainKnob.setVisible(selected && sound);
         }
 
         g.setColour(Colours::white);
@@ -68,7 +78,7 @@ public:
                 audioThumbnail.drawChannel(g, bounds.removeFromRight(getWidth() * (1 - end)), end * length, length, 0, 1.0f);
             }
 
-            g.setOpacity(1);
+            g.setOpacity(0.5);
             audioThumbnail.drawChannel(g, bounds, start * length, end * length, 0, 1.0f);
         }
         else
@@ -79,7 +89,9 @@ public:
 
     void resized() override
     {
-
+        auto bounds = getLocalBounds();
+        panKnob.setBounds(bounds.removeFromRight(50));
+        gainKnob.setBounds(bounds.removeFromRight(50));
     }
 
     bool isInterestedInFileDrag(const StringArray& files) override
@@ -185,12 +197,31 @@ private:
             range.setRange(0, 128, true);
 
             sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(new MicroSamplerSound(name, reader, channel, range,
-                                                                      262, 0.1, 0.2)));
+                                                     261.63, 0.1, 0.1)));
 
             audioThumbnail.setSource(new FileInputSource(f));
+            panKnob.s.setValue(sound->pan);
+            gainKnob.s.setValue(sound->gain);
+
             repaint();
 
             callSampleSelectedListeners();
+        }
+    }
+
+    void updatePan()
+    {
+        if (sound)
+        {
+            sound->pan = panKnob.s.getValue();
+        }
+    }
+
+    void updateGain()
+    {
+        if (sound)
+        {
+            sound->gain = gainKnob.s.getValue();
         }
     }
 
@@ -198,6 +229,8 @@ private:
     AudioThumbnailCache audioThumbnailCache;
     AudioThumbnail audioThumbnail;
     Synthesiser& sampler;
+    FloatSlider panKnob{ "Pan", Slider::RotaryHorizontalVerticalDrag, true, -1.0f, 1.0f};
+    FloatSlider gainKnob{ "Gain", Slider::RotaryHorizontalVerticalDrag, true, 0.0f, 1.0f };
 
     bool drag{ false };
 

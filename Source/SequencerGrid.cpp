@@ -47,7 +47,7 @@ void SequencerGrid::resized()
 
     for (int i = 0; i < NUM_VOICES; i++)
     {
-        fbGrid.items.add(FlexItem(*rows[i]).withMinHeight(50.0f).withFlex(1));
+        fbGrid.items.add(FlexItem(*rows[i]).withFlex(1));
     }
 
     auto area = getLocalBounds();

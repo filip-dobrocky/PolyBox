@@ -99,8 +99,8 @@ private:
     OwnedArray<SampleSource> samples;
     SampleSource* selectedSample{ nullptr };
 
-    FloatSlider attackSlider{ "Attack", true, 0.0f, 2.0f};
-    FloatSlider releaseSlider{ "Release", true, 0.0f, 2.0f };
+    FloatSlider attackSlider{ "Attack", Slider::LinearBar, true, 0.0f, 1.0f};
+    FloatSlider releaseSlider{ "Release", Slider::LinearBar, true, 0.0f, 1.0f };
 
     Slider timeSlider{ Slider::SliderStyle::TwoValueHorizontal, Slider::NoTextBox };
     FrequencySlider frequencySlider;

@@ -13,12 +13,15 @@
 PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p), tabs(TabbedButtonBar::TabsAtTop)
 {
+    //getLookAndFeel().setColour(ResizableWindow::backgroundColourId, )
     auto colour = findColour(ResizableWindow::backgroundColourId);
     tabs.addTab("Play", colour, new MainPage(p), true);
     tabs.addTab("Config", colour, new ConfigPage(p), true);
     addAndMakeVisible(tabs);
 
-    setSize (1000, 500);
+    setResizable(true, true);
+    setResizeLimits(800, 350, 2000, 1200);
+    setSize (1000, 600);
 }
 
 PolyBoxAudioProcessorEditor::~PolyBoxAudioProcessorEditor()

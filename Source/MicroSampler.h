@@ -70,8 +70,8 @@ public:
 		int midiChannel,
 		const BigInteger& midiNotes,
 		double frequencyForNormalPitch,
-		double attackTimeSecs,
-		double releaseTimeSecs);
+		double attack,
+		double release);
 
 	/** Destructor. */
 	~MicroSamplerSound();
@@ -105,6 +105,9 @@ public:
 	double getEnd();
 	double getRoot();
 
+	double pan = 0.0f;
+	double gain = 1.0f;
+
 private:
 	//==============================================================================
 	friend class MicroSamplerVoice;
@@ -118,6 +121,7 @@ private:
 	double start = 0.0f;
 	double end = 1.0f;
 	double rootFrequency = 0;
+	double sourceLengthInSeconds = 0;
 	int channel;
 
 	ADSR::Parameters params;

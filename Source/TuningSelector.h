@@ -60,6 +60,7 @@ private:
 
     void loadScale()
     {
+        //TODO: handle exceptions
         if (sclChooser.browseForFileToOpen())
         {
             scl = readSCLFile(sclChooser.getResult().getFullPathName().toStdString());

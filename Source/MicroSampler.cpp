@@ -27,8 +27,8 @@ MicroSamplerSound::MicroSamplerSound(const String& soundName,
 	int midiChannel,
 	const BigInteger& notes,
 	double frequencyForNormalPitch,
-	double attackTimeSecs,
-	double releaseTimeSecs)
+	double attack,
+	double release)
 	: name(soundName),
 	sourceSampleRate(source->sampleRate),
 	midiNotes(notes),
@@ -43,8 +43,10 @@ MicroSamplerSound::MicroSamplerSound(const String& soundName,
 
 		source->read(data.get(), 0, endSample + 4, 0, true, true);
 
-		params.attack = static_cast<float> (attackTimeSecs);
-		params.release = static_cast<float> (releaseTimeSecs);
+		sourceLengthInSeconds = source->lengthInSamples / sourceSampleRate;
+
+		params.attack = static_cast<float> (attack);
+		params.release = static_cast<float> (release);
 	}
 
 	delete source;
@@ -133,8 +135,8 @@ void MicroSamplerVoice::startNote(int midiNoteNumber, float velocity, Synthesise
 			* sound->sourceSampleRate / getSampleRate();
 
 		sourceSamplePosition = sound->startSample;
-		lgain = velocity;
-		rgain = velocity;
+		lgain = velocity * jmin(1 - sound->pan, 1.0) * sound->gain;
+		rgain = velocity * jmin(1 + sound->pan, 1.0) * sound->gain;
 
 		adsr.setSampleRate(sound->sourceSampleRate);
 		adsr.setParameters(sound->params);
