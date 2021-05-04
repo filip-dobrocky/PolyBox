@@ -36,8 +36,8 @@ void SequencerStep::paint (juce::Graphics& g)
     {
         float height = getHeight() - 2;
         float velocityLineH = height - note->velocity * (height - 2);
-        g.setColour(juce::Colours::lightslategrey);
-        g.setOpacity(0.7f);
+        g.setColour(Colour(StepColour::cBorder));
+        g.setOpacity(0.4f);
         Line<float> velocityLine(Point<float>(2, velocityLineH),
             Point<float>(static_cast<float>(getWidth() - 2), velocityLineH));
         g.drawLine(velocityLine, 3.0f);

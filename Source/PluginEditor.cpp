@@ -13,8 +13,8 @@
 PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p), tabs(TabbedButtonBar::TabsAtTop)
 {
-    //getLookAndFeel().setColour(ResizableWindow::backgroundColourId, )
-    auto colour = findColour(ResizableWindow::backgroundColourId);
+    setLookAndFeel(&appLookAndFeel);
+    auto colour = findColour(Slider::textBoxHighlightColourId);
     tabs.addTab("Play", colour, new MainPage(p), true);
     tabs.addTab("Config", colour, new ConfigPage(p), true);
     addAndMakeVisible(tabs);
@@ -26,6 +26,7 @@ PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor&
 
 PolyBoxAudioProcessorEditor::~PolyBoxAudioProcessorEditor()
 {
+    setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -102,7 +103,7 @@ void PolyBoxAudioProcessorEditor::MainPage::resized()
     topBarFb.performLayout(bounds.removeFromTop(50));
     
     samplerComponent.setBounds(bounds.removeFromRight(getWidth()/4));
-    sequencerGrid->setBounds(bounds);
+    sequencerGrid->setBounds(bounds.reduced(8));
 }
    
 

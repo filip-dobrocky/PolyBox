@@ -39,7 +39,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
-        l.setBounds(bounds.removeFromTop(20));
+        l.setBounds(bounds.removeFromTop(l.getFont().getHeight() + 1));
         s.setBounds(bounds);
     }
 
@@ -67,7 +67,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
-        l.setBounds(bounds.removeFromTop(20));
+        l.setBounds(bounds.removeFromTop(l.getFont().getHeight() + 1));
         s.setBounds(bounds);
     }
 
@@ -121,7 +121,7 @@ class FrequencySlider : public Component
 
         double getValueFromText(const String& text) override
         {
-            for (int i = 0; i < 12; i++)
+            for (int i = 11; i >= 0; i--)
             {
                 auto octave = text.fromFirstOccurrenceOf(notes[i], false, true);
                 if (octave.isNotEmpty())
@@ -152,7 +152,7 @@ public:
     void resized() override
     {
         auto bounds = getLocalBounds();
-        l.setBounds(bounds.removeFromTop(20));
+        l.setBounds(bounds.removeFromTop(l.getFont().getHeight() + 1));
         s.setBounds(bounds);
     }
 

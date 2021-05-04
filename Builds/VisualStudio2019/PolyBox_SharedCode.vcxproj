@@ -2058,6 +2058,7 @@
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_gui_extra.cpp"/>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Source\AppLookAndFeel.h"/>
     <ClInclude Include="..\..\Source\Components.h"/>
     <ClInclude Include="..\..\Source\SamplerComponent.h"/>
     <ClInclude Include="..\..\Source\SampleSource.h"/>

@@ -13,6 +13,7 @@
 #include "SequencerGrid.h"
 #include "TuningSelector.h"
 #include "SamplerComponent.h"
+#include "AppLookAndFeel.h"
 
 //==============================================================================
 /**
@@ -67,6 +68,7 @@ public:
     void resized() override;
 
 private:
+    AppLookAndFeel appLookAndFeel;
     PolyBoxAudioProcessor& audioProcessor;
     TabbedComponent tabs;
 

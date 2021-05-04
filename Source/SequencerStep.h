@@ -45,10 +45,10 @@ public:
 
     enum StepColour
     {
-        cInactive = 0xff696969,
-        cActive = 0xffadd8e6,
-        cBorder = 0xfffffff0,
-        cSelected = 0xffff0000
+        cInactive = 0xff235ABE,
+        cActive = 0xff123b7b,
+        cBorder = 0xc8ffffff,
+        cSelected = 0xffBE8723
     };
 
     class JUCE_API  Listener

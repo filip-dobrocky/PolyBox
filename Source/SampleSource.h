@@ -30,6 +30,9 @@ public:
         audioThumbnail.addChangeListener(this);
         addChildComponent(panKnob);
         addChildComponent(gainKnob);
+        auto font = Font(10);
+        panKnob.l.setFont(font);
+        gainKnob.l.setFont(font);
         panKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
         gainKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
         panKnob.s.setDoubleClickReturnValue(true, 0.0f);
@@ -63,12 +66,12 @@ public:
         else if (sound)
         {
             auto bounds = getLocalBounds();
-            g.setColour(Colours::aquamarine);
+            g.setColour(Colour(0xffBE8723));
             const auto start = sound->getStart();
             const auto end = sound->getEnd();
             const auto length = audioThumbnail.getTotalLength();
             
-            g.setOpacity(0.3);
+            g.setOpacity(0.4);
             if (start)
             {
                 audioThumbnail.drawChannel(g, bounds.removeFromLeft(getWidth() * start), 0, start * length, 0, 1.0f);
@@ -78,7 +81,7 @@ public:
                 audioThumbnail.drawChannel(g, bounds.removeFromRight(getWidth() * (1 - end)), end * length, length, 0, 1.0f);
             }
 
-            g.setOpacity(0.5);
+            g.setOpacity(0.6);
             audioThumbnail.drawChannel(g, bounds, start * length, end * length, 0, 1.0f);
         }
         else
@@ -229,8 +232,8 @@ private:
     AudioThumbnailCache audioThumbnailCache;
     AudioThumbnail audioThumbnail;
     Synthesiser& sampler;
-    FloatSlider panKnob{ "Pan", Slider::RotaryHorizontalVerticalDrag, true, -1.0f, 1.0f};
-    FloatSlider gainKnob{ "Gain", Slider::RotaryHorizontalVerticalDrag, true, 0.0f, 1.0f };
+    FloatSlider panKnob{ "PAN", Slider::RotaryHorizontalVerticalDrag, true, -1.0f, 1.0f};
+    FloatSlider gainKnob{ "GAIN", Slider::RotaryHorizontalVerticalDrag, true, 0.0f, 2.0f };
 
     bool drag{ false };
 

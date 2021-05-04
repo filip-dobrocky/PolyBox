@@ -49,9 +49,10 @@ public:
     {
     }
 
-    void paint (juce::Graphics& g) override
+    void paint(juce::Graphics& g) override
     {
-
+        g.setColour(findColour(ResizableWindow::backgroundColourId));
+        g.fillAll();
     }
 
     void resized() override
