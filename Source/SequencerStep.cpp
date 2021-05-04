@@ -26,14 +26,14 @@ SequencerStep::~SequencerStep()
 
 void SequencerStep::paint (juce::Graphics& g)
 {
-    g.setColour(Colour(active ? StepColour::cActive : StepColour::cInactive));
-    g.setOpacity(note->probability);
+    g.setColour(Colour(active ? StepColour::cActive : StepColour::cInactive));   
     g.fillAll();
-    g.setColour(Colour(selected ? StepColour::cSelected : StepColour::cBorder));
-    g.drawRect(getLocalBounds(), 2);
 
     if (note->number != -1)
     {
+        g.setColour(Colour(StepColour::cSelected));
+        g.setOpacity(note->probability * 0.45f + 0.3f);
+        g.fillAll();
         float height = getHeight() - 2;
         float velocityLineH = height - note->velocity * (height - 2);
         g.setColour(Colour(StepColour::cBorder));
@@ -47,6 +47,9 @@ void SequencerStep::paint (juce::Graphics& g)
         g.drawText(String(note->number), getLocalBounds(),
             juce::Justification::centred, true);
     }
+
+    g.setColour(Colour(selected ? StepColour::cSelected : StepColour::cBorder));
+    g.drawRect(getLocalBounds(), 2);
 }
 
 void SequencerStep::resized()
@@ -65,6 +68,38 @@ void SequencerStep::mouseDown(const MouseEvent& event)
 {
     if (event.mouseWasClicked() && event.mods.isLeftButtonDown())
         callStepSelectedListeners();
+}
+
+void SequencerStep::mouseDrag(const MouseEvent& event)
+{
+    auto pos = event.getOffsetFromDragStart();
+    if (event.mouseWasClicked())
+        draggingX = false;
+
+    if (abs(pos.getX()) > 4)
+    {
+        auto value = note->number;
+        draggingX = true;
+        value += pos.getX() / 50;
+        note->number = value > 127 ? 127 : value < -1 ? -1 : value;
+    }
+    else if (abs(pos.getY()) > 4 && note->number != -1 && !draggingX)
+    {
+        auto value = note->velocity;
+        value += pos.getY() / 1000.0f;
+        note->velocity = value > 1.0f ? 1.0f: value < 0 ? 0.0f : value;
+    }
+    callStepSelectedListeners();
+}
+
+void SequencerStep::mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel)
+{
+    if (note->number != -1) {
+        auto value = note->probability;
+        value += wheel.deltaY / 10.0f;
+        note->probability = value > 1.0f ? 1.0f : value < 0 ? 0.0f : value;
+    }
+    callStepSelectedListeners();
 }
 
 void SequencerStep::setActive(bool active) { this->active = active; }
