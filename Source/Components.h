@@ -90,7 +90,7 @@ class FrequencySlider : public Component
 
         double snapValue(double attemptedValue, DragMode dragMode) override
         {
-            if (dragMode == notDragging)
+            if (dragMode == notDragging || fine)
                 return attemptedValue;
 
             auto f = attemptedValue / cFreq;
@@ -116,7 +116,7 @@ class FrequencySlider : public Component
                 note++;
             }
 
-            return notes[note % 12] + String(note / 12) + " (" + String(value) + " Hz)";
+            return notes[note % 12] + String(note / 12) + " (" + String(value) + " Hz - note " + String(note + 12) + ")";
         }
 
         double getValueFromText(const String& text) override
@@ -134,10 +134,17 @@ class FrequencySlider : public Component
             return Slider::getValueFromText(text);
         }
 
+        void mouseDown(const MouseEvent& event) override
+        {
+            Slider::mouseDown(event);
+            fine = event.mods.isAltDown() || event.mods.isCtrlDown();
+        }
+
     private:
         const double cFreq = 16.35f;
         const double halfStep = 1.05946f;
         const String notes[12]{ "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+        bool fine = false;
     };
 
 public:

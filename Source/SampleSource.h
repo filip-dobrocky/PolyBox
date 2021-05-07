@@ -22,23 +22,36 @@ class SampleSource : public Component,
 {
 public:
     SampleSource(Synthesiser& s, int ch) : audioThumbnailCache(5),
-                                           audioThumbnail(512, formatManager, audioThumbnailCache),
-                                           channel(ch),
-                                           sampler(s)
+        audioThumbnail(512, formatManager, audioThumbnailCache),
+        channel(ch),
+        sampler(s)
     {
         formatManager.registerBasicFormats();
         audioThumbnail.addChangeListener(this);
         addChildComponent(panKnob);
         addChildComponent(gainKnob);
+        addChildComponent(attackKnob);
+        addChildComponent(releaseKnob);
         auto font = Font(10);
         panKnob.l.setFont(font);
         gainKnob.l.setFont(font);
+        attackKnob.l.setFont(font);
+        releaseKnob.l.setFont(font);
         panKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
         gainKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
+        attackKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
+        releaseKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
         panKnob.s.setDoubleClickReturnValue(true, 0.0f);
         gainKnob.s.setDoubleClickReturnValue(true, 1.0f);
+        attackKnob.s.setDoubleClickReturnValue(true, 0.01f);
+        releaseKnob.s.setDoubleClickReturnValue(true, 0.1f);
         panKnob.s.onValueChange = [&] { updatePan(); };
         gainKnob.s.onValueChange = [&] { updateGain(); };
+        attackKnob.s.onValueChange = [&] { updateAttack(); };
+        releaseKnob.s.onValueChange = [&] { updateRelease(); };
+
+        for (auto c : getChildren())
+            c->addMouseListener(this, true);
     }
 
     ~SampleSource() override
@@ -54,6 +67,8 @@ public:
             g.fillAll();
             panKnob.setVisible(selected && sound);
             gainKnob.setVisible(selected && sound);
+            attackKnob.setVisible(selected && sound);
+            releaseKnob.setVisible(selected && sound);
         }
 
         g.setColour(Colours::white);
@@ -92,9 +107,12 @@ public:
 
     void resized() override
     {
-        auto bounds = getLocalBounds();
-        panKnob.setBounds(bounds.removeFromRight(50));
-        gainKnob.setBounds(bounds.removeFromRight(50));
+        FlexBox fb;
+        fb.items.add(FlexItem(attackKnob).withFlex(1));
+        fb.items.add(FlexItem(releaseKnob).withFlex(1));
+        fb.items.add(FlexItem(panKnob).withFlex(1));
+        fb.items.add(FlexItem(gainKnob).withFlex(1));
+        fb.performLayout(getLocalBounds());
     }
 
     bool isInterestedInFileDrag(const StringArray& files) override
@@ -200,11 +218,13 @@ private:
             range.setRange(0, 128, true);
 
             sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(new MicroSamplerSound(name, reader, channel, range,
-                                                     261.63, 0.1, 0.1)));
+                                                     261.63, 0.01, 0.1)));
 
             audioThumbnail.setSource(new FileInputSource(f));
             panKnob.s.setValue(sound->pan);
             gainKnob.s.setValue(sound->gain);
+            attackKnob.s.setValue(sound->getAttack());
+            releaseKnob.s.setValue(sound->getRelease());
 
             repaint();
 
@@ -228,12 +248,30 @@ private:
         }
     }
 
+    void updateAttack()
+    {
+        if (sound)
+        {
+            sound->setAttack(attackKnob.s.getValue());
+        }
+    }
+
+    void updateRelease()
+    {
+        if (sound)
+        {
+            sound->setRelease(releaseKnob.s.getValue());
+        }
+    }
+
     AudioFormatManager formatManager;
     AudioThumbnailCache audioThumbnailCache;
     AudioThumbnail audioThumbnail;
     Synthesiser& sampler;
-    FloatSlider panKnob{ "PAN", Slider::RotaryHorizontalVerticalDrag, true, -1.0f, 1.0f};
+    FloatSlider panKnob{ "PAN", Slider::RotaryHorizontalVerticalDrag, true, -1.0f, 1.0f };
     FloatSlider gainKnob{ "GAIN", Slider::RotaryHorizontalVerticalDrag, true, 0.0f, 2.0f };
+    FloatSlider attackKnob{ "ATTACK", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 1.0f };
+    FloatSlider releaseKnob{ "RELEASE", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 2.0f };
 
     bool drag{ false };
 

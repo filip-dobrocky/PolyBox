@@ -20,7 +20,7 @@ PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor&
     addAndMakeVisible(tabs);
 
     setResizable(true, true);
-    setResizeLimits(800, 350, 2000, 1200);
+    setResizeLimits(900, 450, 2000, 1200);
     setSize (1000, 600);
 }
 

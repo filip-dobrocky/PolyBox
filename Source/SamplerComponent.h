@@ -34,13 +34,9 @@ public:
         timeSlider.setRange(0.0f, 1.0f);
         setSlidersEnabled(false);
 
-        attackSlider.s.onValueChange = [&] { attackChanged(); };
-        releaseSlider.s.onValueChange = [&] { releaseChanged(); };
         frequencySlider.s.onValueChange = [&] { frequencyChanged(); };
         timeSlider.onValueChange = [&] { timeChanged(); };
 
-        addAndMakeVisible(attackSlider);
-        addAndMakeVisible(releaseSlider);
         addAndMakeVisible(timeSlider);
         addAndMakeVisible(frequencySlider);
     }
@@ -57,19 +53,15 @@ public:
 
     void resized() override
     {
-        FlexBox samplesFb, controlFb;
+        FlexBox samplesFb;
         
         samplesFb.flexDirection = FlexBox::Direction::column;
         for (auto s : samples)
             samplesFb.items.add(FlexItem(*s).withFlex(1));
         
-        controlFb.items.add(FlexItem(frequencySlider).withFlex(1));
-        controlFb.items.add(FlexItem(attackSlider).withFlex(0.5));
-        controlFb.items.add(FlexItem(releaseSlider).withFlex(0.5));
-
         auto bounds = getLocalBounds();
+        frequencySlider.setBounds(bounds.removeFromBottom(55).reduced(5));
         timeSlider.setBounds(bounds.removeFromBottom(25).reduced(5));
-        controlFb.performLayout(bounds.removeFromBottom(55).reduced(5));
         samplesFb.performLayout(bounds);
     }
 
@@ -100,37 +92,20 @@ private:
     OwnedArray<SampleSource> samples;
     SampleSource* selectedSample{ nullptr };
 
-    FloatSlider attackSlider{ "Attack", Slider::LinearBar, true, 0.0f, 1.0f};
-    FloatSlider releaseSlider{ "Release", Slider::LinearBar, true, 0.0f, 1.0f };
-
     Slider timeSlider{ Slider::SliderStyle::TwoValueHorizontal, Slider::NoTextBox };
     FrequencySlider frequencySlider;
 
     void setSlidersEnabled(bool enabled)
     {
-        attackSlider.setEnabled(enabled);
-        releaseSlider.setEnabled(enabled);
         timeSlider.setEnabled(enabled);
         frequencySlider.setEnabled(enabled);
     }
 
     void setSliderValues(SampleSource* sample)
     {
-        attackSlider.s.setValue(sample->sound->getAttack());
-        releaseSlider.s.setValue(sample->sound->getRelease());
         timeSlider.setMinValue(sample->sound->getStart());
         timeSlider.setMaxValue(sample->sound->getEnd());
         frequencySlider.s.setValue(sample->sound->getRoot());
-    }
-
-    void attackChanged()
-    {
-        selectedSample->sound->setAttack(attackSlider.s.getValue());
-    }
-
-    void releaseChanged()
-    {
-        selectedSample->sound->setRelease(releaseSlider.s.getValue());
     }
 
     void frequencyChanged()
