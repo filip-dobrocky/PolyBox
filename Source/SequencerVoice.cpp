@@ -111,8 +111,13 @@ MidiBuffer SequencerVoice::getNoteOn(int sample)
 		if (chance(note->probability))
 		{
 			for (int i = 0; i < NUM_VOICES; i++)
+			{
 				if (channels[i])
+				{
 					buffer.addEvent(MidiMessage::noteOn(i + 1, note->number, note->velocity), sample);
+				}
+			}
+
 			playedNote = note->number;
 		}
 	}
@@ -129,7 +134,9 @@ MidiBuffer SequencerVoice::getNoteOff(int sample)
 		if (channels[i])
 		{
 			if (playedNote != -1)
+			{
 				buffer.addEvent(MidiMessage::noteOff(i + 1, playedNote), sample);
+			}
 		}
 	}
 

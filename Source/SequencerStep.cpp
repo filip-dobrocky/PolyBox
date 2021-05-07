@@ -76,14 +76,14 @@ void SequencerStep::mouseDrag(const MouseEvent& event)
     if (event.mouseWasClicked())
         draggingX = false;
 
-    if (abs(pos.getX()) > 4)
+    if (abs(pos.getX()) > 10)
     {
         auto value = note->number;
         draggingX = true;
-        value += pos.getX() / 50;
+        value += pos.getX() > 0 ? 1 : -1;
         note->number = value > 127 ? 127 : value < -1 ? -1 : value;
     }
-    else if (abs(pos.getY()) > 4 && note->number != -1 && !draggingX)
+    else if (abs(pos.getY()) > 5 && note->number != -1 && !draggingX)
     {
         auto value = note->velocity;
         value += pos.getY() / 1000.0f;

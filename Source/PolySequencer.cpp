@@ -36,7 +36,11 @@ float PolySequencer::getTimeSignature() { return (float)timeSignature.a / (float
 void PolySequencer::setTempo(int tempo) 
 {
 	this->tempo = tempo;
-	//steps = calculateSteps();
+	if (getIntervalInSamples() == 1)
+	{
+		steps = calculateSteps();
+		lengthChanged();
+	}
 }
 
 void PolySequencer::setDuration(int duration)
@@ -61,8 +65,8 @@ void PolySequencer::lengthChanged()
 	auto oldSteps = steps;
 	steps = calculateSteps();
 	auto newPos = position * ((float)steps / (float)oldSteps);
-	position = truncatePositiveToUnsignedInt(newPos);
-	
+	position = truncatePositiveToUnsignedInt(newPos) % steps;
+
 	for (auto voice : voices)
 	{
 		voice->setPosition(position / (steps / voice->getLength()));
@@ -87,7 +91,7 @@ int PolySequencer::calculateSteps()
 
 	int max = sampleRate * (240.0f / tempo) * duration * ((double)timeSignature.a / (double)timeSignature.b);
 
-	return result < max ? result : max;
+	return result > max ? max : result;
 }
 
 void PolySequencer::play()

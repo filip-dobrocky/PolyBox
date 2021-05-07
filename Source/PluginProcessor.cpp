@@ -156,7 +156,7 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     auto interval = sequencer.getIntervalInSamples();
     if (clockInterval != interval)
     {
-        DBG(interval);
+        DBG("INTERVAL " + String(interval));
         clockInterval = interval;
     }
 
@@ -165,7 +165,7 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         if (sequencer.isPlaying())
         {
             if (sampleCounter++ == 0)
-                sequencer.tick(i);
+                sequencer.tick(i+1);
             if (sampleCounter >= clockInterval)
                 sampleCounter = 0;
         }
