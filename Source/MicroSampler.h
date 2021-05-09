@@ -103,6 +103,7 @@ public:
 	double getRelease();
 	double getStart();
 	double getEnd();
+	double getPlayingLengthInSeconds();
 	double getRoot();
 
 	double pan = 0.0f;
@@ -165,6 +166,7 @@ private:
 	double pitchRatio = 0;
 	double sourceSamplePosition = 0;
 	float lgain = 0, rgain = 0;
+	bool stopped = false;
 
 	ADSR adsr;
 

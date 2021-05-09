@@ -25,7 +25,7 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
 #endif
     tuning(std::make_shared<Tuning>())
 {
-    for (int i = 0; i < NUM_VOICES * NUM_VOICES; i++)
+    for (int i = 0; i < 72; i++)
         sampler.addVoice(new MicroSamplerVoice(*tuning));
 }
 

@@ -271,7 +271,7 @@ private:
     FloatSlider panKnob{ "PAN", Slider::RotaryHorizontalVerticalDrag, true, -1.0f, 1.0f };
     FloatSlider gainKnob{ "GAIN", Slider::RotaryHorizontalVerticalDrag, true, 0.0f, 2.0f };
     FloatSlider attackKnob{ "ATTACK", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 1.0f };
-    FloatSlider releaseKnob{ "RELEASE", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 2.0f };
+    FloatSlider releaseKnob{ "RELEASE", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 1.0f };
 
     bool drag{ false };
 

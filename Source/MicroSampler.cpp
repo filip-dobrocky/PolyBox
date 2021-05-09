@@ -45,8 +45,9 @@ MicroSamplerSound::MicroSamplerSound(const String& soundName,
 
 		sourceLengthInSeconds = source->lengthInSamples / sourceSampleRate;
 
-		params.attack = static_cast<float> (attack);
-		params.release = static_cast<float> (release);
+		setAttack(attack);
+		setRelease(release);
+		params.decay = 0.0f;
 	}
 
 	delete source;
@@ -68,12 +69,14 @@ bool MicroSamplerSound::appliesToChannel(int midiChannel)
 
 void MicroSamplerSound::setAttack(double a)
 {
-	params.attack = a;
+	// range: 0..1
+	params.attack = a * 0.5f * getPlayingLengthInSeconds();
 }
 
 void MicroSamplerSound::setRelease(double r)
 {
-	params.release = r;
+	// range: 0..1
+	params.release = r * 0.5f * getPlayingLengthInSeconds();
 }
 
 void MicroSamplerSound::setStart(double s)
@@ -113,6 +116,11 @@ double MicroSamplerSound::getEnd()
 	return end;
 }
 
+double MicroSamplerSound::getPlayingLengthInSeconds()
+{
+	return (static_cast<double>(endSample) - static_cast<double>(startSample)) / sourceSampleRate;
+}
+
 double MicroSamplerSound::getRoot()
 {
 	return rootFrequency;
@@ -124,7 +132,7 @@ MicroSamplerVoice::~MicroSamplerVoice() {}
 
 bool MicroSamplerVoice::canPlaySound(SynthesiserSound* sound)
 {
-	return dynamic_cast<const MicroSamplerSound*> (sound) != nullptr;
+	return dynamic_cast<const MicroSamplerSound*> (sound) != nullptr && !adsr.isActive();
 }
 
 void MicroSamplerVoice::startNote(int midiNoteNumber, float velocity, SynthesiserSound* s, int /*currentPitchWheelPosition*/)
@@ -140,7 +148,8 @@ void MicroSamplerVoice::startNote(int midiNoteNumber, float velocity, Synthesise
 
 		adsr.setSampleRate(sound->sourceSampleRate);
 		adsr.setParameters(sound->params);
-
+		stopped = false;
+		
 		adsr.noteOn();
 	}
 	else
@@ -153,7 +162,11 @@ void MicroSamplerVoice::stopNote(float /*velocity*/, bool allowTailOff)
 {
 	if (allowTailOff)
 	{
-		adsr.noteOff();
+		if (!stopped)
+		{
+			stopped = true;
+			adsr.noteOff();
+		}
 	}
 	else
 	{
@@ -208,7 +221,10 @@ void MicroSamplerVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int st
 			if (sourceSamplePosition > playingSound->endSample)
 			{
 				stopNote(0.0f, false);
-				break;
+			}
+			else if (sourceSamplePosition >= playingSound->endSample - adsr.getParameters().release * playingSound->sourceSampleRate)
+			{
+				stopNote(0.0f, true);
 			}
 		}
 	}
