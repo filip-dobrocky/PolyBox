@@ -56,6 +56,7 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
         sequencerGrid->togglePlay();
     };
     resetButton.onClick = [&] { sequencerGrid->reset(); };
+    recordButton.onClick = [&] { audioProcessor.transposeOn = recordButton.getToggleState(); };
     addAndMakeVisible(playButton);
     addAndMakeVisible(resetButton);
     addAndMakeVisible(recordButton);

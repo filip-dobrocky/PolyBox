@@ -50,7 +50,8 @@ public:
         cInactive = 0xff235ABE,
         cActive = 0xff123b7b,
         cBorder = 0xc8ffffff,
-        cSelected = 0xffBE8723
+        cSelected = 0xffBE8723,
+        cRecording = 0xe0f40600
     };
 
     class JUCE_API  Listener

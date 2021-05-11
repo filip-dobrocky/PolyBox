@@ -59,10 +59,12 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
-    void loadSample();
+    MidiBuffer transposeBuffer(MidiBuffer& b, int rootNote, int transposeNote);
 
-    bool syncOn{ false };
     bool canSync();
+
+    bool syncOn = false;
+    bool transposeOn = false;
 
     float level = 1.0f;
 
@@ -73,6 +75,7 @@ public:
 private:
     int sampleCounter = 0;
     int clockInterval = 0;
+    int playedNote = -1;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PolyBoxAudioProcessor)

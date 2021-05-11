@@ -251,7 +251,7 @@ public:
         setImages(false, true, true,
             img, 1.0f, colour,
             img, 1.0f, colour.brighter(0.1f),
-            img, 1.0f, Colours::orangered.withAlpha(0.8f));
+            img, 1.0f, Colour(0xe0f40600));
     }
 
 };
