@@ -64,6 +64,8 @@ public:
     bool syncOn{ false };
     bool canSync();
 
+    float level = 1.0f;
+
     std::shared_ptr<Tuning> tuning;
     PolySequencer sequencer;
     Synthesiser sampler;

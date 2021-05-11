@@ -11,7 +11,7 @@
 
 //==============================================================================
 PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p), tabs(TabbedButtonBar::TabsAtTop)
+    : AudioProcessorEditor (&p), audioProcessor (p), tabs(p.level)
 {
     setLookAndFeel(&appLookAndFeel);
     auto colour = findColour(Slider::textBoxHighlightColourId);

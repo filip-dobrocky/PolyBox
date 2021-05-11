@@ -14,6 +14,7 @@
 #include "TuningSelector.h"
 #include "SamplerComponent.h"
 #include "AppLookAndFeel.h"
+#include "Tabs.h"
 
 //==============================================================================
 /**
@@ -70,7 +71,7 @@ public:
 private:
     AppLookAndFeel appLookAndFeel;
     PolyBoxAudioProcessor& audioProcessor;
-    TabbedComponent tabs;
+    Tabs tabs;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PolyBoxAudioProcessorEditor)
 };

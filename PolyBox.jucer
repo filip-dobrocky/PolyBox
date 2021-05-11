@@ -19,6 +19,7 @@
         <FILE id="mwt86Q" name="SequencerStep.cpp" compile="1" resource="0"
               file="Source/SequencerStep.cpp"/>
         <FILE id="tf3SV1" name="SequencerStep.h" compile="0" resource="0" file="Source/SequencerStep.h"/>
+        <FILE id="iPip28" name="Tabs.h" compile="0" resource="0" file="Source/Tabs.h"/>
         <FILE id="Nj4yrt" name="TuningSelector.h" compile="0" resource="0"
               file="Source/TuningSelector.h"/>
       </GROUP>
