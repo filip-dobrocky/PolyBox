@@ -7,6 +7,11 @@
   <MAINGROUP id="jRql7p" name="PolyBox">
     <GROUP id="{2D0F0B3F-8B7D-E054-09F8-0D254D316DFE}" name="Source">
       <GROUP id="{036A4BC2-D9B4-688C-8BA3-CA814C7525C2}" name="GUI">
+        <GROUP id="{8F391FDD-7C66-932A-3154-ED643C4A79EC}" name="Images">
+          <FILE id="OK97E4" name="play.png" compile="0" resource="1" file="Source/play.png"/>
+          <FILE id="MNSXr2" name="record.png" compile="0" resource="1" file="Source/record.png"/>
+          <FILE id="M08aVQ" name="reset.png" compile="0" resource="1" file="Source/reset.png"/>
+        </GROUP>
         <FILE id="lQRQ3R" name="AppLookAndFeel.h" compile="0" resource="0"
               file="Source/AppLookAndFeel.h"/>
         <FILE id="VtocFV" name="Components.h" compile="0" resource="0" file="Source/Components.h"/>

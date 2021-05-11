@@ -30,8 +30,9 @@ class PolyBoxAudioProcessorEditor : public juce::AudioProcessorEditor
 
         SequencerGrid* sequencerGrid;
 
-        TextButton playButton{ "Play" };
-        TextButton resetButton{ "Reset" };
+        PlayButton playButton;
+        ResetButton resetButton;
+        RecordButton recordButton;
         Slider bpmSlider;
         ToggleButton syncButton;
         DurationSlider durationSlider;

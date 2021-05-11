@@ -185,7 +185,7 @@ public:
     }
 };
 
-class DecibelSlider : public juce::Slider
+class DecibelSlider : public Slider
 {
 public:
     DecibelSlider() {}
@@ -204,6 +204,80 @@ public:
     {
         return juce::Decibels::toString(value);
     }
+};
+
+class PlayButton : public ImageButton
+{
+public:
+    PlayButton()
+    {
+        setClickingTogglesState(true);
+        auto hashCode = String("play_button").hashCode64();
+        auto img = ImageCache::getFromHashCode (hashCode);
+
+        if (img.isNull())
+        {
+            img = ImageFileFormat::loadFrom(BinaryData::play_png, BinaryData::play_pngSize);
+            ImageCache::addImageToCache(img, hashCode);
+        }
+
+        const auto colour = Colour(0xff123b7b);
+
+        setImages(false, true, true,
+            img, 1.0f, colour,
+            img, 0.4f, colour.brighter(0.1f),
+            img, 1.0f, Colour(0xff5BD0C4));
+    }
+
+};
+
+class RecordButton : public ImageButton
+{
+public:
+    RecordButton()
+    {
+        setClickingTogglesState(true);
+        auto hashCode = String("record_button").hashCode64();
+        auto img = ImageCache::getFromHashCode(hashCode);
+
+        if (img.isNull())
+        {
+            img = ImageFileFormat::loadFrom(BinaryData::record_png, BinaryData::record_pngSize);
+            ImageCache::addImageToCache(img, hashCode);
+        }
+
+        const auto colour = Colour(0xff123b7b);
+
+        setImages(false, true, true,
+            img, 1.0f, colour,
+            img, 1.0f, colour.brighter(0.1f),
+            img, 1.0f, Colours::orangered.withAlpha(0.8f));
+    }
+
+};
+
+class ResetButton : public ImageButton
+{
+public:
+    ResetButton()
+    {
+        auto hashCode = String("reset_button").hashCode64();
+        auto img = ImageCache::getFromHashCode(hashCode);
+
+        if (img.isNull())
+        {
+            img = ImageFileFormat::loadFrom(BinaryData::reset_png, BinaryData::reset_pngSize);
+            ImageCache::addImageToCache(img, hashCode);
+        }
+
+        const auto colour = Colour(0xff123b7b);
+
+        setImages(false, true, true,
+            img, 1.0f, colour,
+            img, 0.4f, colour.brighter(0.1f),
+            img, 1.0f, findColour(Slider::textBoxHighlightColourId));
+    }
+
 };
 
 class ConnectionMatrix : public GroupComponent,

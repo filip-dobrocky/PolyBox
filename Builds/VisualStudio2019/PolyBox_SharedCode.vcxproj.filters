@@ -2,6 +2,9 @@
 
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="PolyBox\Source\GUI\Images">
+      <UniqueIdentifier>{6C4D9F58-AFD8-6900-77A0-2AA4669CA22E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="PolyBox\Source\GUI">
       <UniqueIdentifier>{04D32890-42C9-07B3-AB10-25DD356C7DD3}</UniqueIdentifier>
     </Filter>
@@ -2473,6 +2476,9 @@
     <ClCompile Include="..\..\..\JUCE\modules\juce_gui_extra\juce_gui_extra.mm">
       <Filter>JUCE Modules\juce_gui_extra</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\JuceLibraryCode\BinaryData.cpp">
+      <Filter>JUCE Library Code</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\JuceLibraryCode\include_juce_audio_basics.cpp">
       <Filter>JUCE Library Code</Filter>
     </ClCompile>
@@ -4809,6 +4815,9 @@
     <ClInclude Include="..\..\JuceLibraryCode\AppConfig.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\JuceLibraryCode\BinaryData.h">
+      <Filter>JUCE Library Code</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\JuceLibraryCode\JuceHeader.h">
       <Filter>JUCE Library Code</Filter>
     </ClInclude>
@@ -4817,6 +4826,15 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\..\Source\play.png">
+      <Filter>PolyBox\Source\GUI\Images</Filter>
+    </None>
+    <None Include="..\..\Source\record.png">
+      <Filter>PolyBox\Source\GUI\Images</Filter>
+    </None>
+    <None Include="..\..\Source\reset.png">
+      <Filter>PolyBox\Source\GUI\Images</Filter>
+    </None>
     <None Include="..\..\..\JUCE\modules\juce_audio_devices\native\oboe\CMakeLists.txt">
       <Filter>JUCE Modules\juce_audio_devices\native\oboe</Filter>
     </None>

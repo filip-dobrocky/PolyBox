@@ -50,7 +50,6 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
     sequencerGrid = new SequencerGrid(audioProcessor.sequencer);
     addAndMakeVisible(sequencerGrid);
 
-    playButton.setClickingTogglesState(true);
     playButton.onClick = [&] {
         bool playing = playButton.getToggleState();
         playButton.setButtonText(playing ? "Stop" : "Play");
@@ -59,6 +58,7 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
     resetButton.onClick = [&] { sequencerGrid->reset(); };
     addAndMakeVisible(playButton);
     addAndMakeVisible(resetButton);
+    addAndMakeVisible(recordButton);
 
     bpmSlider.setSliderStyle(Slider::LinearBar);
     bpmSlider.setRange(30, 300, 1);
@@ -93,8 +93,9 @@ void PolyBoxAudioProcessorEditor::MainPage::resized()
 
     auto margin = FlexItem::Margin(10, 10, 10, 10);
 
-    topBarFb.items.add(FlexItem(playButton).withFlex(0.5).withMargin(margin));
-    topBarFb.items.add(FlexItem(resetButton).withFlex(0.5).withMargin(margin));
+    topBarFb.items.add(FlexItem(playButton).withFlex(0.15).withMargin(margin));
+    topBarFb.items.add(FlexItem(resetButton).withFlex(0.15).withMargin(margin));
+    topBarFb.items.add(FlexItem(recordButton).withFlex(0.15).withMargin(margin));
     topBarFb.items.add(FlexItem(bpmSlider).withFlex(1).withMargin(margin));
     topBarFb.items.add(FlexItem(syncButton).withFlex(1).withMargin(margin));
     topBarFb.items.add(FlexItem(durationSlider).withFlex(1).withMargin(margin));
