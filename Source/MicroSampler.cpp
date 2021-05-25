@@ -70,13 +70,13 @@ bool MicroSamplerSound::appliesToChannel(int midiChannel)
 void MicroSamplerSound::setAttack(double a)
 {
 	// range: 0..1
-	params.attack = a * 0.5f * getPlayingLengthInSeconds();
+	params.attack = a;
 }
 
 void MicroSamplerSound::setRelease(double r)
 {
 	// range: 0..1
-	params.release = r * 0.5f * getPlayingLengthInSeconds();
+	params.release = r;
 }
 
 void MicroSamplerSound::setStart(double s)
