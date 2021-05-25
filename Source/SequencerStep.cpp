@@ -16,7 +16,14 @@ using namespace juce;
 //==============================================================================
 SequencerStep::SequencerStep(Note* n) : note(n)
 {
-    selected = active = false;
+    selected = active = recording = false;
+    for (auto device : MidiInput::getAvailableDevices())
+    {
+        if (!deviceManager.isMidiInputDeviceEnabled(device.identifier))
+            deviceManager.setMidiInputDeviceEnabled(device.identifier, true);
+
+        deviceManager.addMidiInputDeviceCallback(device.identifier, this);
+    }
 }
 
 
@@ -48,7 +55,7 @@ void SequencerStep::paint (juce::Graphics& g)
             juce::Justification::centred, true);
     }
 
-    g.setColour(Colour(selected ? StepColour::cSelected : StepColour::cBorder));
+    g.setColour(Colour(recording ? StepColour::cRecording : selected ? StepColour::cSelected : StepColour::cBorder));
     g.drawRect(getLocalBounds(), 2);
 }
 
@@ -68,6 +75,11 @@ void SequencerStep::mouseDown(const MouseEvent& event)
 {
     if (event.mouseWasClicked() && event.mods.isLeftButtonDown())
         callStepSelectedListeners();
+}
+
+void SequencerStep::mouseDoubleClick(const MouseEvent& event)
+{
+    setRecording(true);
 }
 
 void SequencerStep::mouseDrag(const MouseEvent& event)
@@ -102,11 +114,39 @@ void SequencerStep::mouseWheelMove(const MouseEvent& event, const MouseWheelDeta
     callStepSelectedListeners();
 }
 
+void SequencerStep::handleNoteOn(MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
+{
+     note->number = midiNoteNumber;
+     note->velocity = velocity;
+}
+
+void SequencerStep::handleNoteOff(MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity)
+{
+    const MessageManagerLock mmLock;
+    setRecording(false);
+}
+
+
+void SequencerStep::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
+{
+    keyboardState.processNextMidiEvent(message);
+}
+
 void SequencerStep::setActive(bool active) { this->active = active; }
 
 void SequencerStep::setSelected(bool selected)
 { 
     this->selected = selected;
+    repaint();
+}
+
+void SequencerStep::setRecording(bool recording)
+{
+    if (recording)
+        keyboardState.addListener(this);
+    else
+        keyboardState.removeListener(this);
+    this->recording = recording;
     repaint();
 }
 

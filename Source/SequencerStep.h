@@ -17,7 +17,9 @@
 /*
 */
 
-class SequencerStep  : public juce::Component
+class SequencerStep  : public Component,
+                       public MidiInputCallback,
+                       public MidiKeyboardStateListener
 {
 public:
     SequencerStep(Note* note);
@@ -26,8 +28,12 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
     void mouseDown(const MouseEvent& event) override;
+    void mouseDoubleClick(const MouseEvent& event) override;
     void mouseDrag(const MouseEvent& event) override;
-    void mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel);
+    void mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel) override;
+    void handleNoteOn(MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
+    void handleNoteOff(MidiKeyboardState* source, int midiChannel, int midiNoteNumber, float velocity) override;
+    void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) override;
     
     void erase();
 
@@ -41,6 +47,7 @@ public:
     
     void setActive(bool active);
     void setSelected(bool selected);
+    void setRecording(bool recording);
 
     bool isActive();
     bool isSelected();
@@ -69,8 +76,11 @@ public:
 
 private:
     Note* note;
+    AudioDeviceManager deviceManager;
+    MidiKeyboardState keyboardState;
 
     bool active;
+    bool recording;
     bool selected;
     bool draggingX;
 

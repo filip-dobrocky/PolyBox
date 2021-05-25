@@ -114,12 +114,8 @@ void PolySequencer::play()
 
 void PolySequencer::stop()
 {
-	midiMessages.clear();
-	for (int i = 1; i <= 6; i++)
-		for (int j = 0; j < 128; j++)
-			midiMessages.addEvent(MidiMessage::noteOff(i, j), lastSample);
-	
 	playing = false;
+	midiMessages.clear();
 }
 
 void PolySequencer::reset()

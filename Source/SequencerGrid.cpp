@@ -64,7 +64,10 @@ void SequencerGrid::timerCallback()
 void SequencerGrid::stepSelected(SequencerStep* step)
 {
     if (selectedStep)
+    {
         selectedStep->setSelected(false);
+        selectedStep->setRecording(false);
+    }
     step->setSelected(true);
     selectedStep = step;
     noteSlider.setEnabled(selectedStep);
