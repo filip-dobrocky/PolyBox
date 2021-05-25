@@ -44,7 +44,7 @@ public:
         panKnob.s.setDoubleClickReturnValue(true, 0.0f);
         gainKnob.s.setDoubleClickReturnValue(true, 1.0f);
         attackKnob.s.setDoubleClickReturnValue(true, 0.01f);
-        releaseKnob.s.setDoubleClickReturnValue(true, 0.1f);
+        releaseKnob.s.setDoubleClickReturnValue(true, 0.01f);
         panKnob.s.onValueChange = [&] { updatePan(); };
         gainKnob.s.onValueChange = [&] { updateGain(); };
         attackKnob.s.onValueChange = [&] { updateAttack(); };
@@ -218,7 +218,7 @@ private:
             range.setRange(0, 128, true);
 
             sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(new MicroSamplerSound(name, reader, channel, range,
-                                                     261.63, 0.01, 0.1)));
+                                                     261.63, 0.01, 0.01)));
 
             audioThumbnail.setSource(new FileInputSource(f));
             panKnob.s.setValue(sound->pan);
@@ -271,7 +271,7 @@ private:
     FloatSlider panKnob{ "PAN", Slider::RotaryHorizontalVerticalDrag, true, -1.0f, 1.0f };
     FloatSlider gainKnob{ "GAIN", Slider::RotaryHorizontalVerticalDrag, true, 0.0f, 2.0f };
     FloatSlider attackKnob{ "ATTACK", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 1.0f };
-    FloatSlider releaseKnob{ "RELEASE", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 2.0f };
+    FloatSlider releaseKnob{ "RELEASE", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 1.0f };
 
     bool drag{ false };
 
