@@ -195,13 +195,14 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 
     if (transposeOn && playedNote != -1)
     {
-        midiMessages.swapWith(transposeBuffer(sequencer.midiMessages, 60, playedNote));
+        sequencer.transpose(60, playedNote);
     }
     else
     {
-        midiMessages.swapWith(sequencer.midiMessages);
+        sequencer.transposeOff();
     }
 
+    midiMessages.swapWith(sequencer.midiMessages);
     sequencer.midiMessages.clear();
 
     if (syncOn)
@@ -244,22 +245,6 @@ void PolyBoxAudioProcessor::setStateInformation (const void* data, int sizeInByt
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-}
-
-MidiBuffer PolyBoxAudioProcessor::transposeBuffer(MidiBuffer& b, int rootNote, int transposeNote)
-{
-    MidiBuffer bOut;
-    for (auto m : b)
-    {
-        auto message = m.getMessage();
-        if (message.isNoteOnOrOff())
-        {
-            auto note = message.getNoteNumber();
-            message.setNoteNumber(note - rootNote + transposeNote);
-        }
-        bOut.addEvent(message, m.samplePosition);
-    }
-    return  bOut;
 }
 
 //==============================================================================

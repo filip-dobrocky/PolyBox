@@ -59,8 +59,6 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
-    MidiBuffer transposeBuffer(MidiBuffer& b, int rootNote, int transposeNote);
-
     bool canSync();
 
     bool syncOn = false;

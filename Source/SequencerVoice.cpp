@@ -101,7 +101,7 @@ void SequencerVoice::advance()
 		position = 0;
 }
 
-MidiBuffer SequencerVoice::getNoteOn(int sample)
+MidiBuffer SequencerVoice::getNoteOn(int sample, int transposition)
 {
 	auto note = sequence[position];
 	MidiBuffer buffer;
@@ -110,15 +110,17 @@ MidiBuffer SequencerVoice::getNoteOn(int sample)
 	{
 		if (chance(note->probability))
 		{
+			playedNote = jlimit<int>(0, 127, note->number + transposition);
+
 			for (int i = 0; i < NUM_VOICES; i++)
 			{
 				if (channels[i])
 				{
-					buffer.addEvent(MidiMessage::noteOn(i + 1, note->number, note->velocity), sample);
+					buffer.addEvent(MidiMessage::noteOn(i + 1, playedNote, note->velocity), sample);
 				}
 			}
 
-			playedNote = note->number;
+			
 		}
 	}
 

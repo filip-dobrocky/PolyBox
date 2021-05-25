@@ -39,6 +39,8 @@ public:
 	void setDuration(int duration);
 	void setTimeSignature(int a, int b);
 	void setSampleRate(int sampleRate);
+	void transpose(int rootNote, int transposeNote);
+	void transposeOff();
 
 private:
 	int steps;
@@ -47,6 +49,7 @@ private:
 	int duration;
 	int sampleRate;
 	int lastSample;
+	int transposition = 0;
 	Fraction timeSignature;
 	double startTime;
 	bool playing;

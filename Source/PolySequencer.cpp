@@ -78,6 +78,18 @@ void PolySequencer::setSampleRate(int sampleRate)
 	this->sampleRate = sampleRate;
 }
 
+void PolySequencer::transpose(int rootNote, int transposeNote)
+{
+	transposition = transposeNote > -1 && transposeNote < 128 
+					? transposeNote - rootNote
+					: 0;
+}
+
+void PolySequencer::transposeOff()
+{
+	transposition = 0;
+}
+
 bool PolySequencer::shouldPlay(SequencerVoice* v)
 {
 	return !(position % (steps / v->getLength()));
@@ -130,7 +142,7 @@ void PolySequencer::tick(int sample)
 			auto buffer = voices[i]->getNoteOff(sample);
 			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
 
-			buffer.swapWith(voices[i]->getNoteOn(sample + 1));
+			buffer.swapWith(voices[i]->getNoteOn(sample + 1, transposition));
 			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
 		}
 	}
