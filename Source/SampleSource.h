@@ -175,7 +175,8 @@ public:
 
     const int channel;
     MicroSamplerSound* sound{ nullptr };
-    bool selected{ false };
+    bool selected = false;
+    bool reversed = false;
 
     class JUCE_API  Listener
     {

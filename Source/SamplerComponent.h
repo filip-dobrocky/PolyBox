@@ -36,9 +36,11 @@ public:
 
         frequencySlider.s.onValueChange = [&] { frequencyChanged(); };
         timeSlider.onValueChange = [&] { timeChanged(); };
+        reverseButton.onClick = [&] { reverseClicked(); };
 
         addAndMakeVisible(timeSlider);
         addAndMakeVisible(frequencySlider);
+        addAndMakeVisible(reverseButton);
     }
 
     ~SamplerComponent() override
@@ -62,6 +64,7 @@ public:
         auto bounds = getLocalBounds();
         frequencySlider.setBounds(bounds.removeFromBottom(55).reduced(5));
         timeSlider.setBounds(bounds.removeFromBottom(25).reduced(5));
+        reverseButton.setBounds(bounds.removeFromBottom(25).reduced(5));
         samplesFb.performLayout(bounds);
     }
 
@@ -94,11 +97,13 @@ private:
 
     Slider timeSlider{ Slider::SliderStyle::TwoValueHorizontal, Slider::NoTextBox };
     FrequencySlider frequencySlider;
+    ToggleButton reverseButton{ "Reverse sample" };
 
     void setSlidersEnabled(bool enabled)
     {
         timeSlider.setEnabled(enabled);
         frequencySlider.setEnabled(enabled);
+        reverseButton.setEnabled(enabled);
     }
 
     void setSliderValues(SampleSource* sample)
@@ -106,6 +111,7 @@ private:
         timeSlider.setMinValue(sample->sound->getStart());
         timeSlider.setMaxValue(sample->sound->getEnd());
         frequencySlider.s.setValue(sample->sound->getRoot());
+        reverseButton.setToggleState(sample->reversed, NotificationType::dontSendNotification);
     }
 
     void frequencyChanged()
@@ -118,6 +124,15 @@ private:
         selectedSample->sound->setStart(timeSlider.getMinValue());
         selectedSample->sound->setEnd(timeSlider.getMaxValue());
         selectedSample->repaint();
+    }
+
+    void reverseClicked()
+    {
+        if (selectedSample->sound)
+        {
+            selectedSample->reversed = !selectedSample->reversed;
+            selectedSample->sound->reverse();
+        }
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SamplerComponent)

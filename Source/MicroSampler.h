@@ -98,6 +98,7 @@ public:
 	void setStart(double s);
 	void setEnd(double e);
 	void setRoot(double frequency);
+	void reverse();
 
 	double getAttack();
 	double getRelease();

@@ -96,6 +96,11 @@ void MicroSamplerSound::setRoot(double frequency)
 	rootFrequency = frequency;
 }
 
+void MicroSamplerSound::reverse()
+{
+	data->reverse(0, data->getNumSamples());
+}
+
 double MicroSamplerSound::getAttack()
 {
 	return params.attack;
@@ -144,6 +149,7 @@ void MicroSamplerVoice::startNote(int midiNoteNumber, float velocity, Synthesise
 			* sound->sourceSampleRate / getSampleRate();
 
 		sourceSamplePosition = sound->startSample;
+
 		lgain = velocity * jmin(1 - sound->pan, 1.0) * sound->gain;
 		rgain = velocity * jmin(1 + sound->pan, 1.0) * sound->gain;
 
