@@ -74,7 +74,7 @@ private:
     int sampleCounter = 0;
     int clockInterval = 0;
     int playedNote = -1;
-    bool playing = false;
+    bool stopped = true;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PolyBoxAudioProcessor)

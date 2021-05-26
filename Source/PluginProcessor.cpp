@@ -162,7 +162,7 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 
 	if (sequencer.isPlaying())
 	{
-        playing = true;
+        stopped = false;
 		for (int i = 0; i < buffer.getNumSamples(); i++)
 		{
 
@@ -172,17 +172,6 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 				sampleCounter = 0;
 
 		}
-	}
-	else
-	{
-        if (playing)
-        {
-            for (int i = 1; i <= 6; i++)
-                for (int j = 0; j < 128; j++)
-                    midiMessages.addEvent(MidiMessage::noteOff(i, j), 1);
-            sampleCounter = 0;
-            playing = false;
-        }
 	}
 
     for (auto m : midiMessages)
@@ -214,6 +203,16 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 
     midiMessages.swapWith(sequencer.midiMessages);
     sequencer.midiMessages.clear();
+
+    // turn all notes off on stop
+    if (!stopped && !sequencer.isPlaying())
+    {
+        for (int i = 1; i <= 6; i++)
+            for (int j = 0; j < 128; j++)
+                midiMessages.addEvent(MidiMessage::noteOff(i, j), 1);
+        sampleCounter = 0;
+        stopped = true;
+    }
 
     if (syncOn)
     {
