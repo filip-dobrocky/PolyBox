@@ -145,7 +145,7 @@ class MicroSamplerVoice : public SynthesiserVoice
 public:
 	//==============================================================================
 	/** Creates a SamplerVoice. */
-	MicroSamplerVoice(Tunings::Tuning& tuning);
+	MicroSamplerVoice(std::shared_ptr<Tunings::Tuning> tuning);
 
 	/** Destructor. */
 	~MicroSamplerVoice();
@@ -170,7 +170,7 @@ private:
 
 	ADSR adsr;
 
-	Tunings::Tuning& tuning;
+	std::shared_ptr<Tunings::Tuning> tuning;
 
 	JUCE_LEAK_DETECTOR(MicroSamplerVoice)
 };

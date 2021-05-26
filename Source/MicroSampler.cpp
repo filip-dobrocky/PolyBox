@@ -127,7 +127,7 @@ double MicroSamplerSound::getRoot()
 }
 
 //==============================================================================
-MicroSamplerVoice::MicroSamplerVoice(Tunings::Tuning& tuning) : tuning(tuning) {}
+MicroSamplerVoice::MicroSamplerVoice(std::shared_ptr<Tunings::Tuning> tuning) : tuning(tuning) {}
 MicroSamplerVoice::~MicroSamplerVoice() {}
 
 bool MicroSamplerVoice::canPlaySound(SynthesiserSound* sound)
@@ -139,7 +139,8 @@ void MicroSamplerVoice::startNote(int midiNoteNumber, float velocity, Synthesise
 {
 	if (auto* sound = dynamic_cast<const MicroSamplerSound*> (s))
 	{
-		pitchRatio = (tuning.frequencyForMidiNote(midiNoteNumber) / sound->rootFrequency)
+		auto t = *tuning;
+		pitchRatio = (t.frequencyForMidiNote(midiNoteNumber) / sound->rootFrequency)
 			* sound->sourceSampleRate / getSampleRate();
 
 		sourceSamplePosition = sound->startSample;

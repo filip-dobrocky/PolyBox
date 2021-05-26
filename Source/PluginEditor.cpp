@@ -143,8 +143,10 @@ PolyBoxAudioProcessorEditor::ConfigPage::ConfigPage(PolyBoxAudioProcessor& p) : 
 
 void PolyBoxAudioProcessorEditor::ConfigPage::resized()
 {
-    matrix.setBounds(30, 30, 250, 250);
-    tuningSelector.setBounds(400, 30, 500, 250);
+    FlexBox fb;
+    fb.items.add(FlexItem(matrix).withMaxHeight(250).withMaxWidth(250).withFlex(1));
+    fb.items.add(FlexItem(tuningSelector).withFlex(0.8));
+    fb.performLayout(getLocalBounds());
 }
 
 void PolyBoxAudioProcessorEditor::ConfigPage::connectionChanged(int voice, int channel, bool state)
