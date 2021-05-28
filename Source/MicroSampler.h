@@ -67,6 +67,7 @@ public:
 	*/
 	MicroSamplerSound(const String& name,
 		AudioFormatReader* source,
+		String path,
 		int midiChannel,
 		const BigInteger& midiNotes,
 		double frequencyForNormalPitch,
@@ -109,6 +110,9 @@ public:
 
 	double pan = 0.0f;
 	double gain = 1.0f;
+	bool reversed = false;
+	int channel;
+	String sourcePath;
 
 private:
 	//==============================================================================
@@ -124,7 +128,6 @@ private:
 	double end = 1.0f;
 	double rootFrequency = 0;
 	double sourceLengthInSeconds = 0;
-	int channel;
 
 	ADSR::Parameters params;
 

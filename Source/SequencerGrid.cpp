@@ -21,6 +21,9 @@ SequencerGrid::SequencerGrid(PolySequencer& s) : sequencer(s)
     addAndMakeVisible(probabilitySlider);
 
     erase();
+
+    if (sequencer.isPlaying())
+        startTimer(30);
 }
 
 SequencerGrid::~SequencerGrid()

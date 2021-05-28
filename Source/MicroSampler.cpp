@@ -24,6 +24,7 @@
 
 MicroSamplerSound::MicroSamplerSound(const String& soundName,
 	AudioFormatReader* source,
+	String path,
 	int midiChannel,
 	const BigInteger& notes,
 	double frequencyForNormalPitch,
@@ -33,7 +34,8 @@ MicroSamplerSound::MicroSamplerSound(const String& soundName,
 	sourceSampleRate(source->sampleRate),
 	midiNotes(notes),
 	rootFrequency(frequencyForNormalPitch),
-	channel(midiChannel)
+	channel(midiChannel),
+	sourcePath(path)
 {
 	if (sourceSampleRate > 0 && source->lengthInSamples > 0)
 	{
@@ -99,6 +101,7 @@ void MicroSamplerSound::setRoot(double frequency)
 void MicroSamplerSound::reverse()
 {
 	data->reverse(0, data->getNumSamples());
+	reversed = !reversed;
 }
 
 double MicroSamplerSound::getAttack()

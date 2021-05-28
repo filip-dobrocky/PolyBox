@@ -57,6 +57,8 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
     };
     resetButton.onClick = [&] { sequencerGrid->reset(); };
     recordButton.onClick = [&] { audioProcessor.transposeOn = recordButton.getToggleState(); };
+    playButton.setToggleState(p.sequencer.isPlaying(), NotificationType::dontSendNotification);
+    recordButton.setToggleState(p.transposeOn, NotificationType::dontSendNotification);
     addAndMakeVisible(playButton);
     addAndMakeVisible(resetButton);
     addAndMakeVisible(recordButton);
@@ -73,11 +75,13 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
         syncButton.setButtonText("Sync");
         syncButton.changeWidthToFitText();
         syncButton.setClickingTogglesState(true);
+        syncButton.setToggleState(audioProcessor.syncOn, NotificationType::dontSendNotification);
         syncButton.onClick = [&] { toggleSync(); };
         addAndMakeVisible(syncButton);
     }
 
     durationSlider.onValueChange = [&] { durationChanged(); };
+    durationSlider.setValue(p.sequencer.getDuration());
     addAndMakeVisible(durationSlider);
 
     addAndMakeVisible(samplerComponent);

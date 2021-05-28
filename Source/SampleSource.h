@@ -32,6 +32,16 @@ public:
         addChildComponent(gainKnob);
         addChildComponent(attackKnob);
         addChildComponent(releaseKnob);
+
+        for (int i = 0; i < sampler.getNumSounds(); i++)
+        {
+            if (auto s = dynamic_cast<MicroSamplerSound*> (sampler.getSound(i).get()))
+            {
+                if (s->channel == channel)
+                    this->sound = s;
+            }
+        }
+
         auto font = Font(10);
         panKnob.l.setFont(font);
         gainKnob.l.setFont(font);
@@ -52,6 +62,15 @@ public:
 
         for (auto c : getChildren())
             c->addMouseListener(this, true);
+
+        if (sound)
+        {
+            audioThumbnail.setSource(new FileInputSource(File(sound->sourcePath)));
+            attackKnob.s.setValue(sound->getAttack());
+            releaseKnob.s.setValue(sound->getRelease());
+            panKnob.s.setValue(sound->pan);
+            gainKnob.s.setValue(sound->gain);
+        }
     }
 
     ~SampleSource() override
@@ -64,12 +83,13 @@ public:
         {
             g.setColour(Colours::white);
             g.setOpacity(0.1);
-            g.fillAll();
-            panKnob.setVisible(selected && sound);
-            gainKnob.setVisible(selected && sound);
-            attackKnob.setVisible(selected && sound);
-            releaseKnob.setVisible(selected && sound);
+            g.fillAll();   
         }
+
+        panKnob.setVisible(sound);
+        gainKnob.setVisible(sound);
+        attackKnob.setVisible(sound);
+        releaseKnob.setVisible(sound);
 
         g.setColour(Colours::white);
         g.setFont(14.0f);
@@ -176,7 +196,6 @@ public:
     const int channel;
     MicroSamplerSound* sound{ nullptr };
     bool selected = false;
-    bool reversed = false;
 
     class JUCE_API  Listener
     {
@@ -218,7 +237,7 @@ private:
             BigInteger range;
             range.setRange(0, 128, true);
 
-            sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(new MicroSamplerSound(name, reader, channel, range,
+            sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(new MicroSamplerSound(name, reader, f.getFullPathName(), channel, range,
                                                      261.63, 0.01, 0.01)));
 
             audioThumbnail.setSource(new FileInputSource(f));

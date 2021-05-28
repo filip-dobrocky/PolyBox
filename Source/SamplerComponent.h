@@ -80,8 +80,8 @@ public:
 
         if (sample->sound)
         {
-            setSlidersEnabled(true);
             setSliderValues(sample);
+            setSlidersEnabled(true);
         }
         else
         {
@@ -108,10 +108,9 @@ private:
 
     void setSliderValues(SampleSource* sample)
     {
-        timeSlider.setMinValue(sample->sound->getStart());
-        timeSlider.setMaxValue(sample->sound->getEnd());
+        timeSlider.setMinAndMaxValues(sample->sound->getStart(), sample->sound->getEnd(), NotificationType::dontSendNotification);
         frequencySlider.s.setValue(sample->sound->getRoot());
-        reverseButton.setToggleState(sample->reversed, NotificationType::dontSendNotification);
+        reverseButton.setToggleState(sample->sound->reversed, NotificationType::dontSendNotification);
     }
 
     void frequencyChanged()
@@ -130,7 +129,6 @@ private:
     {
         if (selectedSample->sound)
         {
-            selectedSample->reversed = !selectedSample->reversed;
             selectedSample->sound->reverse();
         }
     }
