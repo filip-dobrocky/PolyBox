@@ -25,7 +25,7 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
 #endif
     tuning(std::make_shared<Tuning>())
 {
-    for (int i = 0; i < 72; i++)
+    for (int i = 0; i < NUM_VOICES * NUM_VOICES * 2; i++)
         sampler.addVoice(new MicroSamplerVoice(tuning));
 }
 
@@ -143,36 +143,8 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; i++)
         buffer.clear (i, 0, buffer.getNumSamples());
-    
-    //Sequencer Control
-    auto interval = sequencer.getIntervalInSamples();
-    if (clockInterval != interval)
-    {
-        DBG("INTERVAL " + String(interval));
-        clockInterval = interval;
-    }
-
-	if (sequencer.isPlaying())
-	{
-        stopped = false;
-		for (int i = 0; i < buffer.getNumSamples(); i++)
-		{
-
-			if (sampleCounter++ == 0)
-				sequencer.tick(i + 1);
-			if (sampleCounter >= clockInterval)
-				sampleCounter = 0;
-
-		}
-	}
 
     for (auto m : midiMessages)
     {
@@ -201,19 +173,6 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
         sequencer.transposeOff();
     }
 
-    midiMessages.swapWith(sequencer.midiMessages);
-    sequencer.midiMessages.clear();
-
-    // turn all notes off on stop
-    if (!stopped && !sequencer.isPlaying())
-    {
-        for (int i = 1; i <= 6; i++)
-            for (int j = 0; j < 128; j++)
-                midiMessages.addEvent(MidiMessage::noteOff(i, j), 1);
-        sampleCounter = 0;
-        stopped = true;
-    }
-
     if (syncOn)
     {
         if (auto ph = getPlayHead())
@@ -225,6 +184,41 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
                 sequencer.setTimeSignature(info.timeSigNumerator, info.timeSigDenominator);
             }
         }
+    }
+
+    //Sequencer Control
+    auto interval = sequencer.getIntervalInSamples();
+    if (clockInterval != interval)
+    {
+        DBG("INTERVAL " + String(interval));
+        clockInterval = interval;
+    }
+
+    if (sequencer.isPlaying())
+    {
+        stopped = false;
+        for (int i = 0; i < buffer.getNumSamples(); i++)
+        {
+
+            if (sampleCounter++ == 0)
+                sequencer.tick(i + 1);
+            if (sampleCounter >= clockInterval)
+                sampleCounter = 0;
+
+        }
+    }
+
+    midiMessages.swapWith(sequencer.midiMessages);
+    sequencer.midiMessages.clear();
+
+    // turn all notes off on stop
+    if (!stopped && !sequencer.isPlaying())
+    {
+        for (int i = 1; i <= NUM_VOICES; i++)
+            for (int j = 0; j < 128; j++)
+                midiMessages.addEvent(MidiMessage::noteOff(i, j), 1);
+        sampleCounter = 0;
+        stopped = true;
     }
 
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());

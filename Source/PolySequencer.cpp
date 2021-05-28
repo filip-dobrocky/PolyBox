@@ -65,7 +65,7 @@ void PolySequencer::lengthChanged()
 	auto oldSteps = steps;
 	steps = calculateSteps();
 	auto newPos = position * ((float)steps / (float)oldSteps);
-	position = truncatePositiveToUnsignedInt(newPos) % steps;
+	position = jlimit<int>(0, steps - 1, truncatePositiveToUnsignedInt(newPos));
 
 	for (auto voice : voices)
 	{

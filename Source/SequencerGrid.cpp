@@ -140,7 +140,7 @@ void SequencerGrid::erase()
 SequencerGrid::SequencerRow::SequencerRow(SequencerVoice* v, SequencerGrid* g) : voice(v), grid(g)
 {
     lengthSlider.setSliderStyle(Slider::SliderStyle::IncDecButtons);
-    lengthSlider.setRange(1, 32, 1);
+    lengthSlider.setRange(1, 64, 1);
     lengthSlider.setValue(previousLength = voice->getLength());
     lengthSlider.setIncDecButtonsMode(Slider::IncDecButtonMode::incDecButtonsDraggable_Horizontal);
     lengthSlider.onValueChange = [&] { lengthChanged(); };

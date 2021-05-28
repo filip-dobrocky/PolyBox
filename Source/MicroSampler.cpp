@@ -144,8 +144,7 @@ void MicroSamplerVoice::startNote(int midiNoteNumber, float velocity, Synthesise
 {
 	if (auto* sound = dynamic_cast<const MicroSamplerSound*> (s))
 	{
-		auto t = *tuning;
-		pitchRatio = (t.frequencyForMidiNote(midiNoteNumber) / sound->rootFrequency)
+		pitchRatio = (tuning->frequencyForMidiNote(midiNoteNumber) / sound->rootFrequency)
 			* sound->sourceSampleRate / getSampleRate();
 
 		sourceSamplePosition = sound->startSample;
