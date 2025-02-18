@@ -71,8 +71,9 @@ private:
     Scale scl;
     KeyboardMapping kbm;
     std::shared_ptr<Tuning> tuning;
-    FileChooser sclChooser{ "Load .scl", File::getSpecialLocation(File::userDesktopDirectory), "*.scl" };
-    FileChooser kbmChooser{ "Load .kbm", File::getSpecialLocation(File::userDesktopDirectory), "*.kbm" };
+
+    std::unique_ptr<FileChooser> sclChooser;
+    std::unique_ptr<FileChooser> kbmChooser;
 
     TextButton sclButton{ "Load scale" };
     TextButton kbmButton{ "Load mapping" };
@@ -85,36 +86,48 @@ private:
 
     void loadScale()
     {
-        try 
+        sclChooser = std::make_unique<FileChooser>("Load .scl", File::getSpecialLocation(File::userDesktopDirectory), "*.scl");
+        auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
+
+        sclChooser->launchAsync(chooserFlags, [this](const FileChooser& fc)
         {
-            if (sclChooser.browseForFileToOpen())
+            if (fc.getResult().exists())
             {
-                scl = readSCLFile(sclChooser.getResult().getFullPathName().toStdString());
-                *tuning = Tuning(scl, kbm);
-                sclLabel.setText("Scale: " + scl.description, NotificationType::dontSendNotification);
+                try
+                {
+                    scl = readSCLFile(fc.getResult().getFullPathName().toStdString());
+                    *tuning = Tuning(scl, kbm);
+                    sclLabel.setText("Scale: " + scl.description, NotificationType::dontSendNotification);
+                }
+                catch (...)
+                {
+                    sclLabel.setText("Scale: could not open file", NotificationType::dontSendNotification);
+                }
             }
-        }
-        catch (...)
-        {
-            sclLabel.setText("Scale: could not open file", NotificationType::dontSendNotification);
-        }
+        });
     }
 
     void loadMapping()
     {
-        try
+        kbmChooser = std::make_unique<FileChooser>("Load .kbm", File::getSpecialLocation(File::userDesktopDirectory), "*.kbm");
+        auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
+
+        kbmChooser->launchAsync(chooserFlags, [this](const FileChooser& fc)
         {
-            if (kbmChooser.browseForFileToOpen())
+            if (fc.getResult().exists())
             {
-                kbm = readKBMFile(kbmChooser.getResult().getFullPathName().toStdString());
-                *tuning = Tuning(scl, kbm);
-                kbmLabel.setText("Mapping: " + kbm.name, NotificationType::dontSendNotification);
+                try
+                {
+                    kbm = readKBMFile(fc.getResult().getFullPathName().toStdString());
+                    *tuning = Tuning(scl, kbm);
+                    kbmLabel.setText("Mapping: " + kbm.name, NotificationType::dontSendNotification);
+                }
+                catch (...)
+                {
+                    kbmLabel.setText("Mapping: could not open file", NotificationType::dontSendNotification);
+                }
             }
-        }
-        catch (...)
-        {
-            kbmLabel.setText("Mapping: could not open file", NotificationType::dontSendNotification);
-        }
+        });
     }
 
     void loadEqual(int m, int n)

@@ -211,14 +211,20 @@ public:
 
 
 private:
+    std::unique_ptr<FileChooser> chooser;
+
     void chooseFile()
     {
-        FileChooser chooser{ "Load sample", File::getSpecialLocation(File::userDesktopDirectory), "*.wav; *.mp3; *.aif; *.flac" };
-        if (chooser.browseForFileToOpen())
-        {
-            auto file = chooser.getResult();
-            loadSample(file);
-        }
+        chooser = std::make_unique<FileChooser> ( "Load sample", File::getSpecialLocation(File::userDesktopDirectory), "*.wav; *.mp3; *.aif; *.flac" );
+		auto chooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
+        
+		chooser->launchAsync(chooserFlags, [this](const FileChooser& fc)
+			{
+				if (fc.getResult().exists())
+				{
+					loadSample(fc.getResult());
+				}
+			});
     }
 
     void loadSample(File f)

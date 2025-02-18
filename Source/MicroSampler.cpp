@@ -205,6 +205,7 @@ void MicroSamplerVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int st
 			auto alpha = (float)(sourceSamplePosition - pos);
 			auto invAlpha = 1.0f - alpha;
 
+			//TODO: access violation - check if pos + 1 is within bounds
 			// just using a very simple linear interpolation here..
 			float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
 			float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha)
