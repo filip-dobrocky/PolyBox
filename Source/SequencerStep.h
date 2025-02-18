@@ -79,10 +79,12 @@ private:
     AudioDeviceManager deviceManager;
     MidiKeyboardState keyboardState;
 
+    float dragWidth;
+    float dragHeight;
+
     bool active;
     bool recording;
     bool selected;
-    bool draggingX;
 
     ListenerList<Listener> listeners;
     void callStepSelectedListeners();

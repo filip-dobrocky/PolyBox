@@ -24,6 +24,10 @@ SequencerStep::SequencerStep(Note* n) : note(n)
 
         deviceManager.addMidiInputDeviceCallback(device.identifier, this);
     }
+
+    const Displays::Display* screen = Desktop::getInstance().getDisplays().getPrimaryDisplay();
+    dragWidth = screen->userArea.getWidth() * 0.33;
+    dragHeight = screen->userArea.getHeight() * 0.33;
 }
 
 
@@ -85,21 +89,29 @@ void SequencerStep::mouseDoubleClick(const MouseEvent& event)
 void SequencerStep::mouseDrag(const MouseEvent& event)
 {
     auto pos = event.getOffsetFromDragStart();
-    if (event.mouseWasClicked())
-        draggingX = false;
+    static int startNote = 60;
+    static float startVel = 0.5f;
+    static bool draggingX = false;
 
-    if (abs(pos.getX()) > 10)
-    {
-        auto value = note->number;
-        draggingX = true;
-        value += pos.getX() > 0 ? 1 : -1;
-        note->number = value > 127 ? 127 : value < -1 ? -1 : value;
+    if (event.mouseWasClicked()) { // on drag start
+        draggingX = false;
+        startNote = (note->number > -1) ? note->number : 60;
+        startVel = note->velocity;
     }
-    else if (abs(pos.getY()) > 5 && note->number != -1 && !draggingX)
+
+    if (abs(pos.getX()) > 0.03 * dragWidth)
+        draggingX = true;
+
+    if (draggingX) // dragging x - thresholding
     {
-        auto value = note->velocity;
-        value += pos.getY() / 1000.0f;
-        note->velocity = value > 1.0f ? 1.0f: value < 0 ? 0.0f : value;
+        auto newNote = startNote + (pos.getX() / (float)dragWidth) * 64;
+        note->number = jlimit<int>(-1, 127, newNote);
+    }
+
+	if (note->number != -1) // dragging y - always
+    {
+		auto newVel = startVel - pos.getY() / (float)dragHeight;
+        note->velocity = jlimit<float>(0.0f, 1.0f, newVel);
     }
     callStepSelectedListeners();
 }
