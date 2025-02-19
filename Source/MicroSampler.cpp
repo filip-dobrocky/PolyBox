@@ -71,13 +71,11 @@ bool MicroSamplerSound::appliesToChannel(int midiChannel)
 
 void MicroSamplerSound::setAttack(double a)
 {
-	// range: 0..1
 	params.attack = a;
 }
 
 void MicroSamplerSound::setRelease(double r)
 {
-	// range: 0..1
 	params.release = r;
 }
 
@@ -228,15 +226,15 @@ void MicroSamplerVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int st
 
 			sourceSamplePosition += pitchRatio;
 
-			if (sourceSamplePosition > playingSound->endSample)
-			{
-				stopNote(0.0f, false);
-			}
-			else if (sourceSamplePosition >= playingSound->endSample - adsr.getParameters().release * playingSound->sourceSampleRate)
+			if (sourceSamplePosition >= playingSound->endSample - adsr.getParameters().release * playingSound->sourceSampleRate)
 			{
 				stopNote(0.0f, true);
+			}
+			if (sourceSamplePosition >= playingSound->endSample)
+			{
+				stopNote(0.0f, false);
+				break;
 			}
 		}
 	}
 }
-
