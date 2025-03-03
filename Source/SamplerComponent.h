@@ -14,6 +14,11 @@
 #include "SampleSource.h"
 #include "PolySequencer.h"
 #include "Components.h"
+#include "Constants.h"
+
+typedef juce::AudioProcessorValueTreeState APVTS;
+typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 
 //==============================================================================
 /*
@@ -22,23 +27,19 @@ class SamplerComponent  : public Component,
                           public SampleSource::Listener
 {
 public:
-    SamplerComponent(Synthesiser &s)
+	SamplerComponent(PolyBoxAudioProcessor& p) : apvts(p.parameters)
     {
         for (int i = 0; i < NUM_VOICES; i++)
         {
-            auto sample = new SampleSource(s, i + 1);
+            auto sample = new SampleSource(p, i + 1);
             sample->addListener(this);
             addAndMakeVisible(samples.add(sample));
         }
 
-        timeSlider.setRange(0.0f, 1.0f);
-        setSlidersEnabled(false);
+        startEndSlider.setRange(0.0f, 1.0f);
+        setComponentsEnabled(false);
 
-        frequencySlider.s.onValueChange = [&] { frequencyChanged(); };
-        timeSlider.onValueChange = [&] { timeChanged(); };
-        reverseButton.onClick = [&] { reverseClicked(); };
-
-        addAndMakeVisible(timeSlider);
+        addAndMakeVisible(startEndSlider);
         addAndMakeVisible(frequencySlider);
         addAndMakeVisible(reverseButton);
     }
@@ -63,7 +64,7 @@ public:
         
         auto bounds = getLocalBounds();
         frequencySlider.setBounds(bounds.removeFromBottom(55).reduced(5));
-        timeSlider.setBounds(bounds.removeFromBottom(25).reduced(5));
+        startEndSlider.setBounds(bounds.removeFromBottom(25).reduced(5));
         reverseButton.setBounds(bounds.removeFromBottom(25).reduced(5));
         samplesFb.performLayout(bounds);
     }
@@ -80,57 +81,62 @@ public:
 
         if (sample->sound)
         {
-            setSliderValues(sample);
-            setSlidersEnabled(true);
+			rootAttachment.reset();
+			reverseAttachment.reset();
+			startEndAttachment.reset();
+
+            rootAttachment.reset(new SliderAttachment(
+                apvts, "s" + String(sample->midiChannel) + "Root", frequencySlider.s));
+            reverseAttachment.reset(new ButtonAttachment(
+                apvts, "s" + String(sample->midiChannel) + "Reversed", reverseButton));
+            startEndAttachment.reset(new TwoValueSliderAttachment(
+				apvts, "s" + String(sample->midiChannel) + "Start", "s" + String(sample->midiChannel) + "End", startEndSlider));
+                
+			startEndAttachment->onValueChange = [&] { selectedSample->repaint(); };
+
+            setComponentsEnabled(true);
         }
         else
         {
-            setSlidersEnabled(false);
+            rootAttachment.reset();
+            reverseAttachment.reset();
+            setComponentsEnabled(false);
         }
 
         selectedSample = sample;
     }
 
+	void loadSample(String path, int midiChannel)
+	{
+		for (auto s : samples)
+		{
+			if (s->midiChannel == midiChannel)
+			{
+				File f(path);
+				s->loadSample(f);
+				break;
+			}
+		}
+	}
+
 private:
     OwnedArray<SampleSource> samples;
     SampleSource* selectedSample{ nullptr };
 
-    Slider timeSlider{ Slider::SliderStyle::TwoValueHorizontal, Slider::NoTextBox };
+    Slider startEndSlider{ Slider::SliderStyle::TwoValueHorizontal, Slider::NoTextBox };
     FrequencySlider frequencySlider;
     ToggleButton reverseButton{ "Reverse sample" };
 
-    void setSlidersEnabled(bool enabled)
+	APVTS& apvts;
+	std::unique_ptr<SliderAttachment> rootAttachment;
+	std::unique_ptr<ButtonAttachment> reverseAttachment;
+	std::unique_ptr<TwoValueSliderAttachment> startEndAttachment;
+
+    void setComponentsEnabled(bool enabled)
     {
-        timeSlider.setEnabled(enabled);
+        startEndSlider.setEnabled(enabled);
         frequencySlider.setEnabled(enabled);
         reverseButton.setEnabled(enabled);
-    }
-
-    void setSliderValues(SampleSource* sample)
-    {
-        timeSlider.setMinAndMaxValues(sample->sound->getStart(), sample->sound->getEnd(), NotificationType::dontSendNotification);
-        frequencySlider.s.setValue(sample->sound->getRoot());
-        reverseButton.setToggleState(sample->sound->reversed, NotificationType::dontSendNotification);
-    }
-
-    void frequencyChanged()
-    {
-        selectedSample->sound->setRoot(frequencySlider.s.getValue());
-    }
-
-    void timeChanged()
-    {
-        selectedSample->sound->setStart(timeSlider.getMinValue());
-        selectedSample->sound->setEnd(timeSlider.getMaxValue());
-        selectedSample->repaint();
-    }
-
-    void reverseClicked()
-    {
-        if (selectedSample->sound)
-        {
-            selectedSample->sound->reverse();
-        }
     }
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SamplerComponent)

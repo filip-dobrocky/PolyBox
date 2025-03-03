@@ -12,6 +12,7 @@
 #include "Tunings.h"
 #include "MicroSampler.h"
 #include "PolySequencer.h"
+#include "Constants.h"
 
 using namespace juce;
 using namespace Tunings;
@@ -59,22 +60,27 @@ public:
     void getStateInformation(juce::MemoryBlock& destData) override;
     void setStateInformation(const void* data, int sizeInBytes) override;
 
+    bool isSoundLoaded(int midiChannel);
+	
+    AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
+
     bool canSync();
-
-    bool syncOn = false;
-    bool transposeOn = false;
-
-    float level = 1.0f;
+	MicroSamplerSound* loadSample(AudioFormatReader* source, String path, int midiChannel);
 
     std::shared_ptr<Tuning> tuning;
     PolySequencer sequencer;
     Synthesiser sampler;
+    AudioProcessorValueTreeState parameters;
 
 private:
     int sampleCounter = 0;
     int clockInterval = 0;
     int playedNote = -1;
     bool stopped = true;
+
+    float previousLevel;
+
+    AudioFormatManager formatManager;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PolyBoxAudioProcessor)

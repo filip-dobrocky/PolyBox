@@ -16,6 +16,8 @@
 #include "AppLookAndFeel.h"
 #include "Tabs.h"
 
+typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
+
 //==============================================================================
 /**
 */
@@ -40,10 +42,15 @@ class PolyBoxAudioProcessorEditor : public juce::AudioProcessorEditor
 
         void toggleSync();
         void durationChanged();
-        void bpmChanged();
 
         PolyBoxAudioProcessor& audioProcessor;
         PolySequencer& sequencer;
+
+        std::unique_ptr<ButtonAttachment> syncAttachment;
+        std::unique_ptr<ButtonAttachment> recordAttachment;
+		std::unique_ptr<SliderAttachment> durationAttachment;
+		std::unique_ptr<SliderAttachment> bpmAttachment;
+
     };
 
     struct ConfigPage : Component,
@@ -68,6 +75,8 @@ public:
     //==============================================================================
     void paint(juce::Graphics&) override;
     void resized() override;
+
+    SamplerComponent& getSamplerComponent();
 
 private:
     AppLookAndFeel appLookAndFeel;

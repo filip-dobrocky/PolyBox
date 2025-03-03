@@ -14,6 +14,7 @@ SequencerGrid::SequencerGrid(PolySequencer& s) : sequencer(s)
     noteSlider.s.onValueChange = [&] { noteChanged(); };
     velocitySlider.s.onValueChange = [&] { velocityChanged(); };
     probabilitySlider.s.onValueChange = [&] { probabilityChanged(); };
+
     velocitySlider.setEnabled(false);
     probabilitySlider.setEnabled(false);
     addAndMakeVisible(noteSlider);
@@ -22,8 +23,7 @@ SequencerGrid::SequencerGrid(PolySequencer& s) : sequencer(s)
 
     erase();
 
-    if (sequencer.isPlaying())
-        startTimer(30);
+    startTimer(30);
 }
 
 SequencerGrid::~SequencerGrid()
@@ -101,20 +101,6 @@ void SequencerGrid::probabilityChanged()
     auto value = probabilitySlider.s.getValue();
     selectedStep->setProbability(value);
     selectedStep->repaint();
-}
-
-void SequencerGrid::togglePlay()
-{
-    if (sequencer.isPlaying())
-    {
-        sequencer.stop();
-        stopTimer();
-    }
-    else
-    {
-        sequencer.play();
-        startTimer(30);
-    }
 }
 
 void SequencerGrid::reset()

@@ -23,10 +23,13 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
                      #endif
                        ),
 #endif
-    tuning(std::make_shared<Tuning>())
+    tuning(std::make_shared<Tuning>()),
+    parameters(*this, nullptr, "PARAMETERS", createParameterLayout())
 {
     for (int i = 0; i < NUM_VOICES * NUM_VOICES * 2; i++)
         sampler.addVoice(new MicroSamplerVoice(tuning));
+
+	formatManager.registerBasicFormats();
 }
 
 PolyBoxAudioProcessor::~PolyBoxAudioProcessor()
@@ -34,6 +37,55 @@ PolyBoxAudioProcessor::~PolyBoxAudioProcessor()
 }
 
 //==============================================================================
+
+AudioProcessorValueTreeState::ParameterLayout PolyBoxAudioProcessor::createParameterLayout()
+{
+	AudioProcessorValueTreeState::ParameterLayout layout;
+
+    auto masterRange = NormalisableRange<float>(-96.0f, 12.0f);
+    masterRange.setSkewForCentre(-12.0f);
+    auto gainRange = NormalisableRange<float>(-96.0f, 12.0f);
+    gainRange.setSkewForCentre(0.0f);
+	auto tempoRange = NormalisableRange<float>(MIN_TEMPO, MAX_TEMPO, 1.0f);
+	tempoRange.setSkewForCentre(160.0f);
+
+    layout.add(std::make_unique<AudioParameterFloat>("masterLevel", "Master Level", masterRange, 0.0f));
+	layout.add(std::make_unique<AudioParameterFloat>("tempo", "Tempo", tempoRange, 120.0f));
+	layout.add(std::make_unique<AudioParameterInt>("duration", "Pattern Duration", MIN_BARS, MAX_BARS, 1));
+    layout.add(std::make_unique<AudioParameterBool>("syncOn", "Sync On", false));
+    layout.add(std::make_unique<AudioParameterBool>("transposeOn", "Transpose On", false));
+
+    // Add parameters for each voice
+    for (int i = 1; i <= NUM_VOICES; i++)
+    {
+        layout.add(std::make_unique<AudioParameterFloat>(
+            "s" + String(i) + "Pan", "Sound " + String(i) + " Pan",
+            NormalisableRange<float>(-1.0f, 1.0f), 0.0f));
+        layout.add(std::make_unique<AudioParameterFloat>(
+            "s" + String(i) + "Gain", "Sound " + String(i) + " Gain",
+            gainRange, 0.0f));
+        layout.add(std::make_unique<AudioParameterFloat>(
+            "s" + String(i) + "Attack", "Sound " + String(i) + " Attack",
+            NormalisableRange<float>(MIN_ATTACK, MAX_ATTACK), DEFAULT_ATTACK));
+        layout.add(std::make_unique<AudioParameterFloat>(
+            "s" + String(i) + "Release", "Sound " + String(i) + " Release",
+            NormalisableRange<float>(MIN_RELEASE, MAX_RELEASE), DEFAULT_RELEASE));
+		layout.add(std::make_unique<AudioParameterFloat>(
+			"s" + String(i) + "Root", "Sound " + String(i) + " Root Frequency",
+			NormalisableRange<float>(MIN_ROOT_F, MAX_ROOT_F), DEFAULT_ROOT_F));
+        layout.add(std::make_unique<AudioParameterFloat>(
+			"s" + String(i) + "Start", "Sound " + String(i) + " Start",
+			NormalisableRange<float>(0.0f, 1.0f), 0.0f));
+		layout.add(std::make_unique<AudioParameterFloat>(
+			"s" + String(i) + "End", "Sound " + String(i) + " End",
+			NormalisableRange<float>(0.0f, 1.0f), 1.0f));
+		layout.add(std::make_unique<AudioParameterBool>(
+			"s" + String(i) + "Reversed", "Sound " + String(i) + " Reversed", false));
+    }
+
+	return layout;
+}
+
 const juce::String PolyBoxAudioProcessor::getName() const
 {
     return JucePlugin_Name;
@@ -96,6 +148,35 @@ bool PolyBoxAudioProcessor::canSync()
     return getPlayHead();
 }
 
+MicroSamplerSound* PolyBoxAudioProcessor::loadSample(AudioFormatReader* source, String path, int midiChannel)
+{
+	MicroSamplerSound* sound = nullptr;
+    
+    for (int i = 0; i < sampler.getNumSounds(); i++)
+    {
+        if (sampler.getSound(i))
+        {
+            if (dynamic_cast<MicroSamplerSound*>(sampler.getSound(i).get())->midiChannel == midiChannel)
+            {
+                sampler.removeSound(i);
+            }
+        }
+    }
+    const String name = "s" + midiChannel;
+
+    BigInteger range;
+    range.setRange(0, 128, true);
+
+    sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(
+        new MicroSamplerSound(name, source, path, midiChannel, range,
+            DEFAULT_ROOT_F, DEFAULT_ATTACK, DEFAULT_RELEASE)));
+	
+    auto paths = parameters.state.getOrCreateChildWithName("paths", nullptr);
+    paths.setProperty("s" + String(midiChannel) + "Path", path, nullptr);
+
+    return sound;
+}
+
 void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
@@ -105,6 +186,7 @@ void PolyBoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBloc
 {
     sampler.setCurrentPlaybackSampleRate(sampleRate);
     sequencer.setSampleRate(sampleRate);
+    previousLevel = parameters.getRawParameterValue("masterLevel")->load();
 }
 
 void PolyBoxAudioProcessor::releaseResources()
@@ -142,6 +224,51 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    auto syncOn = parameters.getRawParameterValue("syncOn")->load();
+    auto transposeOn = parameters.getRawParameterValue("transposeOn")->load();
+    auto masterLevel = parameters.getRawParameterValue("masterLevel")->load();
+	auto tempo = parameters.getRawParameterValue("tempo")->load();
+	auto duration = parameters.getRawParameterValue("duration")->load();
+
+	sequencer.setDuration(duration);
+
+	for (int i = 1; i <= NUM_VOICES; i++)
+	{	
+        MicroSamplerSound* sound = nullptr;
+		for (int j = 0; j < sampler.getNumSounds(); j++)
+		{
+			if (auto s = dynamic_cast<MicroSamplerSound*>(sampler.getSound(j).get()))
+			{
+				if (s->midiChannel == i)
+				{
+					sound = s;
+					break;
+				}
+			}
+		}
+
+		if (sound)
+		{
+            auto pan = parameters.getRawParameterValue("s" + String(i) + "Pan")->load();
+            auto gain = parameters.getRawParameterValue("s" + String(i) + "Gain")->load();
+            auto attack = parameters.getRawParameterValue("s" + String(i) + "Attack")->load();
+            auto release = parameters.getRawParameterValue("s" + String(i) + "Release")->load();
+            auto root = parameters.getRawParameterValue("s" + String(i) + "Root")->load();
+            auto start = parameters.getRawParameterValue("s" + String(i) + "Start")->load();
+            auto end = parameters.getRawParameterValue("s" + String(i) + "End")->load();
+            auto reversed = parameters.getRawParameterValue("s" + String(i) + "Reversed")->load();
+
+			sound->pan = pan;
+			sound->gain = Decibels::decibelsToGain(gain);
+			sound->setAttack(attack);
+			sound->setRelease(release);
+			sound->setRoot(root);
+			sound->setStart(start);
+			sound->setEnd(end);
+			sound->setReversed(reversed);
+		}
+	}
 
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; i++)
         buffer.clear (i, 0, buffer.getNumSamples());
@@ -184,7 +311,11 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
                 sequencer.setTimeSignature(info.timeSigNumerator, info.timeSigDenominator);
             }
         }
-    }
+	}
+	else
+	{
+		sequencer.setTempo(tempo);
+	}
 
     //Sequencer Control
     auto interval = sequencer.getIntervalInSamples();
@@ -222,7 +353,17 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     }
 
     sampler.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-    buffer.applyGain(level);
+
+	if (approximatelyEqual(masterLevel, previousLevel))
+	{
+		buffer.applyGain(Decibels::decibelsToGain(masterLevel));
+	}
+    else
+    {
+		buffer.applyGainRamp(0, buffer.getNumSamples(),
+            Decibels::decibelsToGain(previousLevel), Decibels::decibelsToGain(masterLevel));
+		previousLevel = masterLevel;
+    }
 }
 
 //==============================================================================
@@ -237,17 +378,94 @@ juce::AudioProcessorEditor* PolyBoxAudioProcessor::createEditor()
 }
 
 //==============================================================================
-void PolyBoxAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void PolyBoxAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    auto state = parameters.copyState();
+
+    for (int i = 0; i < NUM_VOICES; i++)
+    {
+        auto voice = sequencer.voices[i];
+        auto length = voice->getLength();
+        auto voiceProp = state.getOrCreateChildWithName("seqV" + String(i), nullptr);
+        voiceProp.setProperty("length", length, nullptr);
+        
+        for (int j = 0; j < length; j++) {
+            auto note = voice->getNotePtr(j);
+            auto noteProp = voiceProp.getOrCreateChildWithName("note" + String(j), nullptr);
+            noteProp.setProperty("num", note->number, nullptr);
+            noteProp.setProperty("vel", note->velocity, nullptr);
+            noteProp.setProperty("prob", note->probability, nullptr);
+        }
+    }
+
+    std::unique_ptr<juce::XmlElement> xml(state.createXml());
+    copyXmlToBinary(*xml, destData);
 }
 
-void PolyBoxAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void PolyBoxAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+    {
+        parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
+    }
+
+    for (int i = 0; i < NUM_VOICES; i++)
+    {
+        if (isSoundLoaded(i + 1)) {
+            DBG("Sound already loaded");
+            continue;
+        }
+
+        auto paths = parameters.state.getOrCreateChildWithName("paths", nullptr);
+        auto path = paths.getProperty("s" + String(i + 1) + "Path", String()).toString();
+
+        if (path.isNotEmpty())
+        {
+            auto file = File(path);
+            if (file.exists())
+            {
+                DBG("Loading sample: " + file.getFullPathName());
+                if (auto reader = formatManager.createReaderFor(file))
+                {
+                    loadSample(reader, file.getFullPathName(), i + 1);
+                }
+            }
+        }
+
+        auto voiceProp = parameters.state.getOrCreateChildWithName("seqV" + String(i), nullptr);
+        auto length = (int)voiceProp.getProperty("length", DEFAULT_STEPS);
+        auto voice = sequencer.voices[i];
+        voice->setLength(length);
+        for (int j = 0; j < length; j++)
+        {
+            auto noteProp = voiceProp.getOrCreateChildWithName("note" + String(j), nullptr);
+            auto num = (int)noteProp.getProperty("num", -1);
+            auto vel = (float)noteProp.getProperty("vel", 0.5f);
+            auto prob = (float)noteProp.getProperty("prob", 1.0f);
+            auto note = voice->getNotePtr(j);
+            note->number = num;
+            note->velocity = vel;
+            note->probability = prob;
+            DBG("note loaded " + String(num) + " " + String(vel) + " " + String(prob));
+        }
+    }
+}
+
+bool PolyBoxAudioProcessor::isSoundLoaded(int midiChannel)
+{
+    for (int j = 0; j < sampler.getNumSounds(); j++)
+    {
+        if (auto sound = dynamic_cast<MicroSamplerSound*>(sampler.getSound(j).get()))
+        {
+            if (sound->midiChannel == midiChannel)
+            {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 //==============================================================================

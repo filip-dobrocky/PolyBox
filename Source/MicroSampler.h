@@ -64,7 +64,7 @@ public:
 	void setStart(double s);
 	void setEnd(double e);
 	void setRoot(double frequency);
-	void reverse();
+	void setReversed(bool reversed);
 
 	double getAttack();
 	double getRelease();
@@ -72,18 +72,19 @@ public:
 	double getEnd();
 	double getPlayingLengthInSeconds();
 	double getRoot();
+	bool getReversed();
+	String getSourcePath();
 
 	double pan = 0.0f;
 	double gain = 1.0f;
-	bool reversed = false;
-	int channel;
-	String sourcePath;
+	int midiChannel;
 
 private:
 	//==============================================================================
 	friend class MicroSamplerVoice;
 
 	String name;
+	String sourcePath;
 	std::unique_ptr<AudioBuffer<float>> data;
 	double sourceSampleRate;
 	BigInteger midiNotes;
@@ -93,6 +94,7 @@ private:
 	double end = 1.0f;
 	double rootFrequency = 0;
 	double sourceLengthInSeconds = 0;
+	bool reversed = false;
 
 	ADSR::Parameters params;
 

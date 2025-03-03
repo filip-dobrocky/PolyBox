@@ -1,9 +1,9 @@
 #pragma once
 #include <vector>
 #include <JuceHeader.h>
+#include "Constants.h"
 
 #define DEFAULT_STEPS 8
-#define NUM_VOICES 6
 
 struct Note {
 	int number;
@@ -23,6 +23,7 @@ public:
 	int getPosition();
 	void setPosition(int position);
 	int getLength();
+	void setLength(int length);
 	Note* getNotePtr(int index);
 	Note* getLastNotePtr();
 	MidiBuffer getNoteOn(int sample, int transposition);

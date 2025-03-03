@@ -25,7 +25,7 @@ int PolySequencer::getSteps() { return steps; }
 
 int PolySequencer::getPosition() { return position; }
 
-int PolySequencer::getTempo() { return tempo; }
+float PolySequencer::getTempo() { return tempo; }
 
 int PolySequencer::getDuration() { return duration; }
 
@@ -33,7 +33,7 @@ bool PolySequencer::isPlaying() { return playing; };
 
 float PolySequencer::getTimeSignature() { return (float)timeSignature.a / (float)timeSignature.b; }
 
-void PolySequencer::setTempo(int tempo) 
+void PolySequencer::setTempo(float tempo) 
 {
 	this->tempo = tempo;
 	if (getIntervalInSamples() == 1)
@@ -76,6 +76,7 @@ void PolySequencer::lengthChanged()
 void PolySequencer::setSampleRate(int sampleRate)
 {
 	this->sampleRate = sampleRate;
+	calculateSteps();
 }
 
 void PolySequencer::transpose(int rootNote, int transposeNote)

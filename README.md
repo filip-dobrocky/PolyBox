@@ -2,8 +2,6 @@
 
 Polyrhythmic step sequencer + sampler with microtuning ability created in JUCE.
 
-Prototype created as a result of bachelor thesis at FEEC, Brno University of Technology.
-
 Features:
 - 6-voice polyrhythmic step sequencer with variable lengths
 - ability to add 6 user samples
@@ -14,4 +12,12 @@ Features:
 
 TODO:
 - ability to save plug-in state - parameters, presets
-- various bug fixes
+    - `SamplerSound` parameters - `gain`, `pan`, `attack`, `release`, `start`, `end`, `root` (`float`), `reversed` (`bool`)
+    - `SequencerVoice` - `length`, `midiChannels`
+    - tuning file paths
+    - sample `sourcePath` (`string`)
+    - Serialize `Sequencer`
+- proper DAW sync
+- UI improvements
+- manual / tooltips
+- multichannel output

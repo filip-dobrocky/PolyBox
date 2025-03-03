@@ -1,5 +1,6 @@
 #pragma once
 #include <JuceHeader.h>
+#include "Constants.h"
 
 class NoteSlider : public Component
 {
@@ -52,13 +53,13 @@ private:
 class FloatSlider : public Component
 {
 public:
-    FloatSlider(String parameter, Slider::SliderStyle style, bool centered, double min, double max)
+    FloatSlider(String parameter, Slider::SliderStyle style, bool centered)
     {
         addAndMakeVisible(s);
         addAndMakeVisible(l);
+		s.setRange(0.0f, 1.0f);
         s.setSliderStyle(style);
-        s.setRange(min, max);
-        s.setNumDecimalPlacesToDisplay(2);
+        s.setNumDecimalPlacesToDisplay(3);
         l.setText(parameter, juce::dontSendNotification);
         l.setJustificationType(centered ? Justification::centred
                                         : Justification::centredLeft);
@@ -83,8 +84,8 @@ class FrequencySlider : public Component
         CustomSlider()
         {
             setSliderStyle(Slider::LinearBar);
-            setRange(24.5f, 1046.5f);
             setNumDecimalPlacesToDisplay(2);
+            setRange(MIN_ROOT_F, MAX_ROOT_F);
             setSkewFactorFromMidPoint(262);
         }
 
@@ -176,7 +177,6 @@ public:
     DurationSlider()
     {
         setSliderStyle(Slider::LinearBar);
-        setRange(1, 10, 1);
     }
 
     String 	getTextFromValue(double value) override
@@ -192,7 +192,7 @@ public:
 
     double getValueFromText(const juce::String& text) override
     {
-        auto minusInfinitydB = -100.0;
+        auto minusInfinitydB = -96.0;
 
         auto decibelText = text.upToFirstOccurrenceOf("dB", false, false).trim();
 
@@ -409,4 +409,62 @@ private:
     OwnedArray<Label> rowLabels, columnLabels;
     Toggle* clickedToggle{ nullptr };
     Label voicesLabel, channelsLabel;
+};
+
+class TwoValueSliderAttachment
+{
+public:
+    TwoValueSliderAttachment(juce::AudioProcessorValueTreeState& apvts,
+        const juce::String& paramIDMin,
+        const juce::String& paramIDMax,
+        juce::Slider& slider)
+        : paramMinAttachment(*apvts.getParameter(paramIDMin), [this, &slider](float newValue)
+            {
+                ignoreCallbacks = true;
+                slider.setMinValue(newValue, juce::dontSendNotification);
+                ignoreCallbacks = false;
+            }),
+        paramMaxAttachment(*apvts.getParameter(paramIDMax), [this, &slider](float newValue)
+            {
+                ignoreCallbacks = true;
+                slider.setMaxValue(newValue, juce::dontSendNotification);
+                ignoreCallbacks = false;
+            }),
+        minParam(apvts.getParameter(paramIDMin)),
+        maxParam(apvts.getParameter(paramIDMax))
+    {
+        jassert(dynamic_cast<juce::AudioParameterFloat*>(minParam) != nullptr);
+        jassert(dynamic_cast<juce::AudioParameterFloat*>(maxParam) != nullptr);
+
+        slider.onValueChange = [this, &slider]()
+            {
+                if (!ignoreCallbacks)
+                {
+                    minParam->beginChangeGesture();
+                    maxParam->beginChangeGesture();
+
+                    minParam->setValueNotifyingHost((float)slider.getMinValue());
+                    maxParam->setValueNotifyingHost((float)slider.getMaxValue());
+
+                    minParam->endChangeGesture();
+                    maxParam->endChangeGesture();
+                }
+                onValueChange();
+            };
+
+        // Initialize UI with parameter values
+        slider.setMinValue(minParam->getValue(), juce::dontSendNotification);
+        slider.setMaxValue(maxParam->getValue(), juce::dontSendNotification);
+    }
+
+    std::function<void()> onValueChange;
+
+private:
+    juce::ParameterAttachment paramMinAttachment;
+    juce::ParameterAttachment paramMaxAttachment;
+
+    juce::RangedAudioParameter* minParam;
+    juce::RangedAudioParameter* maxParam;
+
+    bool ignoreCallbacks = false;
 };

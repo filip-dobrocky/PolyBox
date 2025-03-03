@@ -59,7 +59,6 @@ public:
     void resized() override;
     void timerCallback() override;
 
-    void togglePlay();
     void reset();
 
     void stepSelected(SequencerStep* step) override;
@@ -69,8 +68,8 @@ private:
     SequencerRow* rows[NUM_VOICES];
     SequencerStep* selectedStep{ nullptr };
     NoteSlider noteSlider;
-    FloatSlider velocitySlider{ "Velocity", Slider::LinearBar, false, 0.0f, 1.0f };
-    FloatSlider probabilitySlider{ "Probability", Slider::LinearBar, false, 0.0f, 1.0f };
+    FloatSlider velocitySlider{ "Velocity", Slider::LinearBar, false };
+    FloatSlider probabilitySlider{ "Probability", Slider::LinearBar, false };
 
     void noteChanged();
     void velocityChanged();

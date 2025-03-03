@@ -29,6 +29,23 @@ int SequencerVoice::getLength()
 	return sequence.size();
 }
 
+void SequencerVoice::setLength(int length)
+{
+	auto difference = getLength() - length;
+	if (difference < 0)
+	{
+		for (int i = 0; i < -difference; i++)
+			sequence.add(new Note());
+		onLengthChange();
+	}
+	else if (difference > 0)
+	{
+		for (int i = 0; i < difference; i++)
+			sequence.removeLast();
+		onLengthChange();
+	}
+}
+
 int SequencerVoice::getPosition()
 {
 	return position;

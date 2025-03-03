@@ -9,9 +9,11 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+
 //==============================================================================
 PolyBoxAudioProcessorEditor::PolyBoxAudioProcessorEditor (PolyBoxAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p), tabs(p.level)
+    : AudioProcessorEditor (&p), audioProcessor (p), tabs(p.parameters)
 {
     setLookAndFeel(&appLookAndFeel);
     auto colour = findColour(Slider::textBoxHighlightColourId);
@@ -42,32 +44,29 @@ void PolyBoxAudioProcessorEditor::resized()
     tabs.setBounds(getLocalBounds());
 }
 
+SamplerComponent& PolyBoxAudioProcessorEditor::getSamplerComponent()
+{
+	return static_cast<MainPage*>(tabs.getTabContentComponent(0))->samplerComponent;
+}
+
 
 PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audioProcessor(p),
                                                                             sequencer(p.sequencer),
-                                                                            samplerComponent(p.sampler)
+                                                                            samplerComponent(p)
 {
-    sequencerGrid = new SequencerGrid(audioProcessor.sequencer);
+    sequencerGrid = new SequencerGrid(sequencer);
     addAndMakeVisible(sequencerGrid);
 
-    playButton.onClick = [&] {
-        bool playing = playButton.getToggleState();
-        playButton.setButtonText(playing ? "Stop" : "Play");
-        sequencerGrid->togglePlay();
-    };
+
+    playButton.onClick = [&] { if (playButton.getToggleState()) sequencer.play(); else sequencer.stop(); };
     resetButton.onClick = [&] { sequencerGrid->reset(); };
-    recordButton.onClick = [&] { audioProcessor.transposeOn = recordButton.getToggleState(); };
-    playButton.setToggleState(p.sequencer.isPlaying(), NotificationType::dontSendNotification);
-    recordButton.setToggleState(p.transposeOn, NotificationType::dontSendNotification);
+    
     addAndMakeVisible(playButton);
     addAndMakeVisible(resetButton);
     addAndMakeVisible(recordButton);
 
     bpmSlider.setSliderStyle(Slider::LinearBar);
-    bpmSlider.setRange(30, 300, 1);
     bpmSlider.setTextValueSuffix(" BPM");
-    bpmSlider.onValueChange = [&] { bpmChanged(); };
-    bpmSlider.setValue(p.sequencer.getTempo());
     addAndMakeVisible(bpmSlider);
 
     if (p.canSync())
@@ -75,13 +74,15 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
         syncButton.setButtonText("Sync");
         syncButton.changeWidthToFitText();
         syncButton.setClickingTogglesState(true);
-        syncButton.setToggleState(audioProcessor.syncOn, NotificationType::dontSendNotification);
         syncButton.onClick = [&] { toggleSync(); };
         addAndMakeVisible(syncButton);
     }
 
-    durationSlider.onValueChange = [&] { durationChanged(); };
-    durationSlider.setValue(p.sequencer.getDuration());
+	syncAttachment.reset(new ButtonAttachment(p.parameters, "syncOn", syncButton));
+	recordAttachment.reset(new ButtonAttachment(p.parameters, "transposeOn", recordButton));
+	durationAttachment.reset(new SliderAttachment(p.parameters, "duration", durationSlider));
+	bpmAttachment.reset(new SliderAttachment(p.parameters, "tempo", bpmSlider));
+
     addAndMakeVisible(durationSlider);
 
     addAndMakeVisible(samplerComponent);
@@ -116,10 +117,6 @@ void PolyBoxAudioProcessorEditor::MainPage::resized()
 void PolyBoxAudioProcessorEditor::MainPage::toggleSync()
 {
     const auto state = syncButton.getToggleState();
-    audioProcessor.syncOn = state;
-    
-    if (!state)
-        bpmChanged();
 
     bpmSlider.setEnabled(!state);
 }
@@ -128,11 +125,6 @@ void PolyBoxAudioProcessorEditor::MainPage::durationChanged()
 {
     auto& seq = audioProcessor.sequencer;
     seq.setDuration(durationSlider.getValue());
-}
-
-void PolyBoxAudioProcessorEditor::MainPage::bpmChanged()
-{
-    sequencer.setTempo(bpmSlider.getValue());
 }
 
 PolyBoxAudioProcessorEditor::ConfigPage::ConfigPage(PolyBoxAudioProcessor& p) : audioProcessor(p),

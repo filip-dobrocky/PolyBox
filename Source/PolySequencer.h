@@ -29,13 +29,13 @@ public:
 
 	int getSteps();
 	int getPosition();
-	int getTempo();
+	float getTempo();
 	int getDuration();
 	float getTimeSignature();
 	bool isPlaying();
 	int getIntervalInSamples();
 
-	void setTempo(int tempo);
+	void setTempo(float tempo);
 	void setDuration(int duration);
 	void setTimeSignature(int a, int b);
 	void setSampleRate(int sampleRate);
@@ -45,12 +45,12 @@ public:
 private:
 	int steps;
 	int position;
-	int tempo;
 	int duration;
-	int sampleRate;
+	int sampleRate = 48000;
 	int lastSample;
 	int transposition = 0;
 	Fraction timeSignature;
+	float tempo;
 	double startTime;
 	bool playing;
 

@@ -12,6 +12,10 @@
 
 #include <JuceHeader.h>
 #include "MicroSampler.h"
+#include "Constants.h"
+
+typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+typedef juce::AudioProcessorValueTreeState APVTS;
 
 //==============================================================================
 /*
@@ -21,10 +25,12 @@ class SampleSource : public Component,
     public ChangeListener
 {
 public:
-    SampleSource(Synthesiser& s, int ch) : audioThumbnailCache(5),
+    SampleSource(PolyBoxAudioProcessor& p, int ch) : audioThumbnailCache(5),
         audioThumbnail(512, formatManager, audioThumbnailCache),
-        channel(ch),
-        sampler(s)
+        midiChannel(ch),
+        sampler(p.sampler),
+        parameters(p.parameters),
+		processor(p)
     {
         formatManager.registerBasicFormats();
         audioThumbnail.addChangeListener(this);
@@ -33,44 +39,46 @@ public:
         addChildComponent(attackKnob);
         addChildComponent(releaseKnob);
 
-        for (int i = 0; i < sampler.getNumSounds(); i++)
-        {
-            if (auto s = dynamic_cast<MicroSamplerSound*> (sampler.getSound(i).get()))
-            {
-                if (s->channel == channel)
-                    this->sound = s;
-            }
-        }
-
         auto font = Font(10);
         panKnob.l.setFont(font);
         gainKnob.l.setFont(font);
         attackKnob.l.setFont(font);
         releaseKnob.l.setFont(font);
-        panKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
-        gainKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
-        attackKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
-        releaseKnob.s.setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
-        panKnob.s.setDoubleClickReturnValue(true, 0.0f);
-        gainKnob.s.setDoubleClickReturnValue(true, 1.0f);
-        attackKnob.s.setDoubleClickReturnValue(true, 0.01f);
-        releaseKnob.s.setDoubleClickReturnValue(true, 0.01f);
-        panKnob.s.onValueChange = [&] { updatePan(); };
-        gainKnob.s.onValueChange = [&] { updateGain(); };
-        attackKnob.s.onValueChange = [&] { updateAttack(); };
-        releaseKnob.s.onValueChange = [&] { updateRelease(); };
+        panKnob.s.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+        gainKnob.s.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+        attackKnob.s.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+        releaseKnob.s.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+
+		panAttachment
+            .reset(new SliderAttachment(parameters, "s" + String(midiChannel) + "Pan", panKnob.s));
+		gainAttachment
+            .reset(new SliderAttachment(parameters, "s" + String(midiChannel) + "Gain", gainKnob.s));
+		attackAttachment
+            .reset(new SliderAttachment(parameters, "s" + String(midiChannel) + "Attack", attackKnob.s));
+		releaseAttachment
+            .reset(new SliderAttachment(parameters, "s" + String(midiChannel) + "Release", releaseKnob.s));
 
         for (auto c : getChildren())
             c->addMouseListener(this, true);
 
+        for (int i = 0; i < sampler.getNumSounds(); i++)
+        {
+            if (sampler.getSound(i))
+            {
+				auto sound = dynamic_cast<MicroSamplerSound*>(sampler.getSound(i).get());
+                if (sound->midiChannel == midiChannel)
+                {
+					this->sound = sound;
+                }
+            }
+        }
+
         if (sound)
         {
-            audioThumbnail.setSource(new FileInputSource(File(sound->sourcePath)));
-            attackKnob.s.setValue(sound->getAttack());
-            releaseKnob.s.setValue(sound->getRelease());
-            panKnob.s.setValue(sound->pan);
-            gainKnob.s.setValue(sound->gain);
+            DBG("rerendering");
+            rerenderThumbnail();
         }
+
     }
 
     ~SampleSource() override
@@ -100,28 +108,29 @@ public:
         }
         else if (sound)
         {
+            DBG("drawing wave");
             auto bounds = getLocalBounds();
             g.setColour(Colour(0xffBE8723));
             const auto start = sound->getStart();
             const auto end = sound->getEnd();
             const auto length = audioThumbnail.getTotalLength();
             
-            g.setOpacity(0.4);
-            if (start)
+            g.setOpacity(0.4f);
+            if (start > 0.0f)
             {
                 audioThumbnail.drawChannel(g, bounds.removeFromLeft(getWidth() * start), 0, start * length, 0, 1.0f);
             }
-            if (end < 1)
+            if (end < 1.0f)
             {
                 audioThumbnail.drawChannel(g, bounds.removeFromRight(getWidth() * (1 - end)), end * length, length, 0, 1.0f);
             }
 
-            g.setOpacity(0.6);
+            g.setOpacity(0.6f);
             audioThumbnail.drawChannel(g, bounds, start * length, end * length, 0, 1.0f);
         }
         else
         {
-            g.drawText("Sample " + String(channel), getLocalBounds(), Justification::centred, true);
+            g.drawText("Sample " + String(midiChannel), getLocalBounds(), Justification::centred, true);
         }
     }
 
@@ -193,7 +202,33 @@ public:
             repaint();
     }
 
-    const int channel;
+    void loadSample(File f)
+    {
+        if (auto reader = formatManager.createReaderFor(f))
+        {
+			sound = processor.loadSample(reader, f.getFullPathName(), midiChannel);
+
+            audioThumbnail.setSource(new FileInputSource(f));
+
+            gainKnob.s.setValue(Decibels::gainToDecibels(sound->gain));
+            panKnob.s.setValue(sound->pan);
+            attackKnob.s.setValue(sound->getAttack());
+            releaseKnob.s.setValue(sound->getRelease());
+
+            repaint();
+
+            callSampleSelectedListeners();
+        }
+    }
+
+	void rerenderThumbnail()
+	{
+		DBG("rerendering thumbnail " + sound->getSourcePath());
+		audioThumbnail.setSource(new FileInputSource(File(sound->getSourcePath())));
+		repaint();
+	}
+
+    const int midiChannel;
     MicroSamplerSound* sound{ nullptr };
     bool selected = false;
 
@@ -227,77 +262,21 @@ private:
 			});
     }
 
-    void loadSample(File f)
-    {
-        if (auto reader = formatManager.createReaderFor(f))
-        {
-            const auto name = "s" + channel;
-            for (int i = 0; i < sampler.getNumSounds(); i++)
-            {
-                if (sampler.getSound(i) == sound)
-                {
-                    sampler.removeSound(i);
-                }
-            }
-
-            BigInteger range;
-            range.setRange(0, 128, true);
-
-            sound = dynamic_cast<MicroSamplerSound*>(sampler.addSound(new MicroSamplerSound(name, reader, f.getFullPathName(), channel, range,
-                                                     261.63, 0.01, 0.01)));
-
-            audioThumbnail.setSource(new FileInputSource(f));
-            panKnob.s.setValue(sound->pan);
-            gainKnob.s.setValue(sound->gain);
-            attackKnob.s.setValue(sound->getAttack());
-            releaseKnob.s.setValue(sound->getRelease());
-
-            repaint();
-
-            callSampleSelectedListeners();
-        }
-    }
-
-    void updatePan()
-    {
-        if (sound)
-        {
-            sound->pan = panKnob.s.getValue();
-        }
-    }
-
-    void updateGain()
-    {
-        if (sound)
-        {
-            sound->gain = gainKnob.s.getValue();
-        }
-    }
-
-    void updateAttack()
-    {
-        if (sound)
-        {
-            sound->setAttack(attackKnob.s.getValue());
-        }
-    }
-
-    void updateRelease()
-    {
-        if (sound)
-        {
-            sound->setRelease(releaseKnob.s.getValue());
-        }
-    }
-
+	PolyBoxAudioProcessor& processor;
+    Synthesiser& sampler;
     AudioFormatManager formatManager;
     AudioThumbnailCache audioThumbnailCache;
     AudioThumbnail audioThumbnail;
-    Synthesiser& sampler;
-    FloatSlider panKnob{ "PAN", Slider::RotaryHorizontalVerticalDrag, true, -1.0f, 1.0f };
-    FloatSlider gainKnob{ "GAIN", Slider::RotaryHorizontalVerticalDrag, true, 0.0f, 2.0f };
-    FloatSlider attackKnob{ "ATTACK", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 1.0f };
-    FloatSlider releaseKnob{ "RELEASE", Slider::RotaryHorizontalVerticalDrag, true, 0.01f, 1.0f };
+    FloatSlider panKnob{ "PAN", Slider::RotaryHorizontalVerticalDrag, true };
+    FloatSlider gainKnob{ "GAIN", Slider::RotaryHorizontalVerticalDrag, true };
+    FloatSlider attackKnob{ "ATTACK", Slider::RotaryHorizontalVerticalDrag, true };
+    FloatSlider releaseKnob{ "RELEASE", Slider::RotaryHorizontalVerticalDrag, true };
+
+	APVTS& parameters;
+	std::unique_ptr<SliderAttachment> panAttachment;
+	std::unique_ptr<SliderAttachment> gainAttachment;
+	std::unique_ptr<SliderAttachment> attackAttachment;
+	std::unique_ptr<SliderAttachment> releaseAttachment;
 
     bool drag{ false };
 

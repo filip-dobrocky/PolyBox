@@ -16,17 +16,20 @@
 //==============================================================================
 /*
 */
+typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
+
 class Tabs  : public TabbedComponent
 {
 public:
-    Tabs(float& masterLevel) : TabbedComponent(TabbedButtonBar::TabsAtTop),
-                                level(masterLevel)
+    Tabs(AudioProcessorValueTreeState& apvts) : TabbedComponent(TabbedButtonBar::TabsAtTop),
+        valueTreeState(apvts)
     {
         addAndMakeVisible(masterSlider);
-        masterSlider.setRange(-100, 0);
+        masterSlider.setRange(-96, 12);
+        masterSlider.setSkewFactor(4);
         masterSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 80, 20);
-        masterSlider.setValue(Decibels::gainToDecibels(level));
-        masterSlider.onValueChange = [&] { level = Decibels::decibelsToGain((float)masterSlider.getValue()); };
+
+		masterAttachment.reset(new SliderAttachment(valueTreeState, "masterLevel", masterSlider));
     }
 
     ~Tabs() override
@@ -40,9 +43,9 @@ public:
         masterSlider.setBounds(x, 5, getWidth() - x - 10, 20);
     }
 
-    float& level;
-
 private:
+	AudioProcessorValueTreeState& valueTreeState;
+    std::unique_ptr<SliderAttachment> masterAttachment;
     DecibelSlider masterSlider;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tabs)

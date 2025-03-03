@@ -34,7 +34,7 @@ MicroSamplerSound::MicroSamplerSound(const String& soundName,
 	sourceSampleRate(source->sampleRate),
 	midiNotes(notes),
 	rootFrequency(frequencyForNormalPitch),
-	channel(midiChannel),
+	midiChannel(midiChannel),
 	sourcePath(path)
 {
 	if (sourceSampleRate > 0 && source->lengthInSamples > 0)
@@ -66,7 +66,7 @@ bool MicroSamplerSound::appliesToNote(int midiNoteNumber)
 
 bool MicroSamplerSound::appliesToChannel(int midiChannel)
 {
-	return channel == midiChannel;
+	return this->midiChannel == midiChannel;
 }
 
 void MicroSamplerSound::setAttack(double a)
@@ -96,10 +96,11 @@ void MicroSamplerSound::setRoot(double frequency)
 	rootFrequency = frequency;
 }
 
-void MicroSamplerSound::reverse()
+void MicroSamplerSound::setReversed(bool reversed)
 {
-	data->reverse(0, data->getNumSamples());
-	reversed = !reversed;
+	if (reversed != this->reversed)
+		data->reverse(0, data->getNumSamples());
+	this->reversed = reversed;
 }
 
 double MicroSamplerSound::getAttack()
@@ -132,6 +133,16 @@ double MicroSamplerSound::getRoot()
 	return rootFrequency;
 }
 
+bool MicroSamplerSound::getReversed()
+{
+	return reversed;
+}
+
+String MicroSamplerSound::getSourcePath()
+{
+	return sourcePath;
+}
+
 //==============================================================================
 MicroSamplerVoice::MicroSamplerVoice(std::shared_ptr<Tunings::Tuning> tuning) : tuning(tuning) {}
 MicroSamplerVoice::~MicroSamplerVoice() {}
@@ -149,8 +160,8 @@ void MicroSamplerVoice::startNote(int midiNoteNumber, float velocity, Synthesise
 			* sound->sourceSampleRate / getSampleRate();
 
 		sourceSamplePosition = sound->startSample;
-
-		lgain = velocity * jmin(1 - sound->pan, 1.0) * sound->gain;
+		
+		lgain = velocity * jmin(1 - sound->pan, 1.0) * sound->gain; 
 		rgain = velocity * jmin(1 + sound->pan, 1.0) * sound->gain;
 
 		adsr.setSampleRate(sound->sourceSampleRate);
@@ -203,7 +214,6 @@ void MicroSamplerVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int st
 			auto alpha = (float)(sourceSamplePosition - pos);
 			auto invAlpha = 1.0f - alpha;
 
-			//TODO: access violation - check if pos + 1 is within bounds
 			// just using a very simple linear interpolation here..
 			float l = (inL[pos] * invAlpha + inL[pos + 1] * alpha);
 			float r = (inR != nullptr) ? (inR[pos] * invAlpha + inR[pos + 1] * alpha)
@@ -226,7 +236,8 @@ void MicroSamplerVoice::renderNextBlock(AudioBuffer<float>& outputBuffer, int st
 
 			sourceSamplePosition += pitchRatio;
 
-			if (sourceSamplePosition >= playingSound->endSample - adsr.getParameters().release * playingSound->sourceSampleRate)
+			if (sourceSamplePosition >= playingSound->endSample - adsr.getParameters().release * playingSound->sourceSampleRate
+				&& !stopped)
 			{
 				stopNote(0.0f, true);
 			}
