@@ -10,14 +10,24 @@ Features:
 - real-time pattern transposition using MIDI input
 - multichannel MIDI output
 
-TODO:
-- ability to save plug-in state - parameters, presets
-    - `SamplerSound` parameters - `gain`, `pan`, `attack`, `release`, `start`, `end`, `root` (`float`), `reversed` (`bool`)
-    - `SequencerVoice` - `length`, `midiChannels`
-    - tuning file paths
-    - sample `sourcePath` (`string`)
-    - Serialize `Sequencer`
-- proper DAW sync
+## TODO:
+### HIGH priority
+- state saving - config page
+    - tuning
+    - sequencer routing
+- proper DAW sync - playhead
+- MIDI input function improvement - control `playing` parameter by MIDI input
+### MID priority
 - UI improvements
+    - change record button to midi input button
+    - colors
+    - logo
+    - custom look and feel
+    - prettier sequencer UI
 - manual / tooltips
 - multichannel output
+### EXTRA
+- random sample position
+- envelope curves
+- filters for each sample
+- sequencing audio parameters
