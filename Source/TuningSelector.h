@@ -12,18 +12,20 @@
 
 #include <JuceHeader.h>
 #include "Tunings.h"
+#include "PluginProcessor.h"
 
 using namespace Tunings;
 
 class TuningSelector : public GroupComponent
 {
 public:
-    TuningSelector(std::shared_ptr<Tuning> t) : tuning(t)
+    TuningSelector(PolyBoxAudioProcessor& p) : processor(p), 
+                                               tuning(p.tuning),
+                                               scl(p.scl),
+                                               kbm(p.kbm)
     {
         setText("Tuning");
         setTextLabelPosition(Justification::centred);
-        scl = t->scale;
-        kbm = t->keyboardMapping;
         sclLabel.setText("Scale: " + scl.description, NotificationType::dontSendNotification);
         kbmLabel.setText("Mapping: " + kbm.name, NotificationType::dontSendNotification);
         byLabel.setText("by", NotificationType::dontSendNotification);
@@ -34,8 +36,14 @@ public:
         sclButton.onClick = [&] { loadScale(); };
         kbmButton.onClick = [&] { loadMapping(); };
         equalButton.onClick = [&] { equalToggle(); };
-        spanSlider.onValueChange = [&] { loadEqual(spanSlider.getValue(), divisionSlider.getValue()); };
-        divisionSlider.onValueChange = [&] { loadEqual(spanSlider.getValue(), divisionSlider.getValue()); };
+        spanSlider.onValueChange = [&] { 
+            loadEqual(spanSlider.getValue(), divisionSlider.getValue());
+            processor.equalTuningSpan = spanSlider.getValue(); 
+        };
+        divisionSlider.onValueChange = [&] {
+            loadEqual(spanSlider.getValue(), divisionSlider.getValue()); 
+            processor.equalTuningDivision = divisionSlider.getValue();
+        };
 
         addAndMakeVisible(sclButton);
         addAndMakeVisible(kbmButton);
@@ -45,7 +53,13 @@ public:
         addAndMakeVisible(byLabel);
         addAndMakeVisible(spanSlider);
         addAndMakeVisible(divisionSlider);
-        equalButton.setToggleState(false, NotificationType::sendNotification);
+        
+        if (processor.equalTuningDivision > 0)
+            divisionSlider.setValue(processor.equalTuningDivision, NotificationType::dontSendNotification);
+        if (processor.equalTuningSpan > 0)
+            spanSlider.setValue(processor.equalTuningSpan, NotificationType::dontSendNotification);
+        
+        equalButton.setToggleState(processor.equalTuning, NotificationType::sendNotification);
         equalToggle();
     }
 
@@ -68,8 +82,9 @@ public:
     }
 
 private:
-    Scale scl;
-    KeyboardMapping kbm;
+    PolyBoxAudioProcessor& processor;
+    Scale& scl;
+    KeyboardMapping& kbm;
     std::shared_ptr<Tuning> tuning;
 
     std::unique_ptr<FileChooser> sclChooser;
@@ -91,19 +106,10 @@ private:
 
         sclChooser->launchAsync(chooserFlags, [this](const FileChooser& fc)
         {
-            if (fc.getResult().exists())
-            {
-                try
-                {
-                    scl = readSCLFile(fc.getResult().getFullPathName().toStdString());
-                    *tuning = Tuning(scl, kbm);
-                    sclLabel.setText("Scale: " + scl.description, NotificationType::dontSendNotification);
-                }
-                catch (...)
-                {
-                    sclLabel.setText("Scale: could not open file", NotificationType::dontSendNotification);
-                }
-            }
+            if (processor.loadScl(fc.getResult().getFullPathName()))
+                sclLabel.setText("Scale: " + scl.description, NotificationType::dontSendNotification);
+            else
+                sclLabel.setText("Scale: could not open file", NotificationType::dontSendNotification);
         });
     }
 
@@ -114,19 +120,10 @@ private:
 
         kbmChooser->launchAsync(chooserFlags, [this](const FileChooser& fc)
         {
-            if (fc.getResult().exists())
-            {
-                try
-                {
-                    kbm = readKBMFile(fc.getResult().getFullPathName().toStdString());
-                    *tuning = Tuning(scl, kbm);
-                    kbmLabel.setText("Mapping: " + kbm.name, NotificationType::dontSendNotification);
-                }
-                catch (...)
-                {
-                    kbmLabel.setText("Mapping: could not open file", NotificationType::dontSendNotification);
-                }
-            }
+            if (processor.loadKbm(fc.getResult().getFullPathName()))
+                kbmLabel.setText("Mapping: " + kbm.name, NotificationType::dontSendNotification);
+            else
+                kbmLabel.setText("Mapping: could not open file", NotificationType::dontSendNotification);
         });
     }
 
@@ -138,6 +135,10 @@ private:
 
     void equalToggle()
     {
+        processor.equalTuning = equalButton.getToggleState();
+        processor.equalTuningSpan = spanSlider.getValue();
+        processor.equalTuningDivision = divisionSlider.getValue();
+
         if (equalButton.getToggleState())
         {
             spanSlider.setEnabled(true);

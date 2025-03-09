@@ -31,6 +31,7 @@ int SequencerVoice::getLength()
 
 void SequencerVoice::setLength(int length)
 {
+	sequence.ensureStorageAllocated(length);
 	auto difference = getLength() - length;
 	if (difference < 0)
 	{
@@ -123,7 +124,7 @@ MidiBuffer SequencerVoice::getNoteOn(int sample, int transposition)
 	auto note = sequence[position];
 	MidiBuffer buffer;
 
-	if (note->number != -1)
+	if (note && note->number != -1)
 	{
 		if (chance(note->probability))
 		{

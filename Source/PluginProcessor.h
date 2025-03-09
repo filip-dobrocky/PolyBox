@@ -66,11 +66,21 @@ public:
 
     bool canSync();
 	MicroSamplerSound* loadSample(AudioFormatReader* source, String path, int midiChannel);
+    bool loadScl(String path);
+    bool loadKbm(String path);
 
-    std::shared_ptr<Tuning> tuning;
     PolySequencer sequencer;
     Synthesiser sampler;
     AudioProcessorValueTreeState parameters;
+
+    std::shared_ptr<Tuning> tuning;
+    Scale scl;
+    KeyboardMapping kbm;
+    String sclPath;
+    String kbmPath;
+    bool equalTuning = false;
+    int equalTuningSpan = 0;
+    int equalTuningDivision = 0;
 
 private:
     int sampleCounter = 0;

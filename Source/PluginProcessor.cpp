@@ -26,6 +26,9 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
     tuning(std::make_shared<Tuning>()),
     parameters(*this, nullptr, "PARAMETERS", createParameterLayout())
 {
+    scl = tuning->scale;
+    kbm = tuning->keyboardMapping;
+
     for (int i = 0; i < NUM_VOICES * NUM_VOICES * 2; i++)
         sampler.addVoice(new MicroSamplerVoice(tuning));
 
@@ -175,6 +178,41 @@ MicroSamplerSound* PolyBoxAudioProcessor::loadSample(AudioFormatReader* source, 
     paths.setProperty("s" + String(midiChannel) + "Path", path, nullptr);
 
     return sound;
+}
+
+bool PolyBoxAudioProcessor::loadScl(String path)
+{
+    auto file = File(path);
+    bool success = false;
+    if (file.exists())
+    {
+        try
+        {
+            scl = readSCLFile(path.toStdString());
+            *tuning = Tuning(scl, kbm);
+            sclPath = path;
+            success = true;
+        } catch (...) { }
+    }
+    return success;
+}
+
+bool PolyBoxAudioProcessor::loadKbm(String path)
+{
+    auto file = File(path);
+    bool success = false;
+    if (file.exists())
+    {
+        try
+        {
+            kbm = readKBMFile(path.toStdString());
+            *tuning = Tuning(scl, kbm);
+            kbmPath = path;
+            success = true;
+        }
+        catch (...) {}
+    }
+    return success;
 }
 
 void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& newName)
@@ -382,12 +420,24 @@ void PolyBoxAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
     auto state = parameters.copyState();
 
+    auto tuningProp = state.getOrCreateChildWithName("tuning", nullptr);
+    tuningProp.setProperty("equalTuning", equalTuning, nullptr);
+    tuningProp.setProperty("equalTuningSpan", equalTuningSpan, nullptr);
+    tuningProp.setProperty("equalTuningDivision", equalTuningDivision, nullptr);
+    tuningProp.setProperty("sclPath", sclPath, nullptr);
+    tuningProp.setProperty("kbmPath", kbmPath, nullptr);
+
     for (int i = 0; i < NUM_VOICES; i++)
     {
         auto voice = sequencer.voices[i];
         auto length = voice->getLength();
         auto voiceProp = state.getOrCreateChildWithName("seqV" + String(i), nullptr);
         voiceProp.setProperty("length", length, nullptr);
+        
+        String channels = "";
+        for (int j = 0; j < NUM_VOICES; j++)
+            channels.append(voice->hasChannel(j) ? "1" : "0", 1);
+        voiceProp.setProperty("channels", channels, nullptr);
         
         for (int j = 0; j < length; j++) {
             auto note = voice->getNotePtr(j);
@@ -409,6 +459,33 @@ void PolyBoxAudioProcessor::setStateInformation(const void* data, int sizeInByte
     if (xmlState.get() != nullptr)
     {
         parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
+    }
+
+    auto tuningProp = parameters.state.getOrCreateChildWithName("tuning", nullptr);
+    equalTuning = (bool)tuningProp.getProperty("equalTuning", false);
+    equalTuningSpan = (int)tuningProp.getProperty("equalTuningSpan", 0);
+    equalTuningDivision = (int)tuningProp.getProperty("equalTuningDivision", 0);
+    sclPath = tuningProp.getProperty("sclPath", String()).toString();
+    kbmPath = tuningProp.getProperty("kbmPath", String()).toString();
+
+    if (equalTuning)
+    {
+        if (equalTuningSpan > 0 && equalTuningDivision > 0)
+            *tuning = Tuning(evenDivisionOfSpanByM(equalTuningSpan, equalTuningDivision));
+        else
+            *tuning = Tuning();
+    }
+    else if (sclPath.isEmpty() && kbmPath.isEmpty())
+    {
+        *tuning = Tuning();
+    }
+    else
+    {
+        if (sclPath.isNotEmpty())
+            loadScl(sclPath);
+        if (kbmPath.isNotEmpty())
+            loadKbm(kbmPath);
+        *tuning = Tuning(scl, kbm);
     }
 
     for (int i = 0; i < NUM_VOICES; i++)
@@ -437,7 +514,18 @@ void PolyBoxAudioProcessor::setStateInformation(const void* data, int sizeInByte
         auto voiceProp = parameters.state.getOrCreateChildWithName("seqV" + String(i), nullptr);
         auto length = (int)voiceProp.getProperty("length", DEFAULT_STEPS);
         auto voice = sequencer.voices[i];
+        auto channels = voiceProp.getProperty("channels", String()).toString();
+        if (channels.isNotEmpty()) {
+            for (int j = 0; j < NUM_VOICES; j++) {
+                if (channels[j] == '1')
+                    voice->assignChannel(j);
+                else
+                    voice->deassignChannel(j);
+            }
+        }
+
         voice->setLength(length);
+
         for (int j = 0; j < length; j++)
         {
             auto noteProp = voiceProp.getOrCreateChildWithName("note" + String(j), nullptr);

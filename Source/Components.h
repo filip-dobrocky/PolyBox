@@ -317,9 +317,9 @@ public:
             addAndMakeVisible(rowLabels.add(rL));
         }
 
-        voicesLabel.setText("VOICES", NotificationType::dontSendNotification);
+        voicesLabel.setText("SEQUENCER VOICES", NotificationType::dontSendNotification);
         voicesLabel.setJustificationType(Justification::centredBottom);
-        channelsLabel.setText("CHANNELS", NotificationType::dontSendNotification);
+        channelsLabel.setText("MIDI CHANNELS", NotificationType::dontSendNotification);
         channelsLabel.setJustificationType(Justification::centredBottom);
         addAndMakeVisible(voicesLabel);
         addAndMakeVisible(channelsLabel);

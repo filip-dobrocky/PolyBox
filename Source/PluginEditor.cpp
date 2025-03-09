@@ -6,7 +6,6 @@
   ==============================================================================
 */
 
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
 
 typedef juce::AudioProcessorValueTreeState::SliderAttachment SliderAttachment;
@@ -128,7 +127,7 @@ void PolyBoxAudioProcessorEditor::MainPage::durationChanged()
 }
 
 PolyBoxAudioProcessorEditor::ConfigPage::ConfigPage(PolyBoxAudioProcessor& p) : audioProcessor(p),
-                                                                                tuningSelector(p.tuning),
+                                                                                tuningSelector(p),
                                                                                 sequencer(p.sequencer)
 {
     matrix.addListener(this);

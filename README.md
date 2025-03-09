@@ -6,15 +6,16 @@ Features:
 - 6-voice polyrhythmic step sequencer with variable lengths
 - ability to add 6 user samples
 - variable sequencer-sampler connections
-- microtuning achieved by loading .scl and .kbm files (using Surge Tuning Library - https://github.com/surge-synthesizer/tuning-library)
+- microtuning achieved by loading .scl and .kbm files (using [Surge Tuning Library](https://github.com/surge-synthesizer/tuning-library))
 - real-time pattern transposition using MIDI input
 - multichannel MIDI output
 
 ## TODO:
 ### HIGH priority
-- state saving - config page
-    - tuning
-    - sequencer routing
+- ~~state saving - config page~~
+    - ~~tuning~~
+    - ~~sequencer routing~~ 
+- undo manager
 - proper DAW sync - playhead
 - MIDI input function improvement - control `playing` parameter by MIDI input
 ### MID priority
