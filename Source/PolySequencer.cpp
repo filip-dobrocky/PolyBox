@@ -91,6 +91,13 @@ void PolySequencer::transposeOff()
 	transposition = 0;
 }
 
+void PolySequencer::setNormalizedPosition(float position)
+{
+	this->position = (int)(position * steps);
+	for (auto voice : voices)
+		voice->setPosition((int)(position * voice->getLength()));
+}
+
 bool PolySequencer::shouldPlay(SequencerVoice* v)
 {
 	return !(position % (steps / v->getLength()));

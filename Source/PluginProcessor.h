@@ -69,9 +69,12 @@ public:
     bool loadScl(String path);
     bool loadKbm(String path);
 
+    void setStartingPosition(AudioPlayHead::CurrentPositionInfo info);
+
     PolySequencer sequencer;
     Synthesiser sampler;
     AudioProcessorValueTreeState parameters;
+	UndoManager undoManager;
 
     std::shared_ptr<Tuning> tuning;
     Scale scl;
@@ -87,7 +90,6 @@ private:
     int clockInterval = 0;
     int playedNote = -1;
     bool stopped = true;
-
     float previousLevel;
 
     AudioFormatManager formatManager;

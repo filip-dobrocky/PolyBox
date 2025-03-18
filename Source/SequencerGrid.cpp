@@ -1,9 +1,9 @@
-#include <JuceHeader.h>
 #include "SequencerGrid.h"
 
 using namespace juce;
 //==============================================================================
-SequencerGrid::SequencerGrid(PolySequencer& s) : sequencer(s)
+SequencerGrid::SequencerGrid(PolyBoxAudioProcessor& p) : processor(p),
+                                                         sequencer(p.sequencer)
 {
     for (int i = 0; i < NUM_VOICES; i++)
     {
@@ -22,8 +22,6 @@ SequencerGrid::SequencerGrid(PolySequencer& s) : sequencer(s)
     addAndMakeVisible(probabilitySlider);
 
     erase();
-
-    startTimer(30);
 }
 
 SequencerGrid::~SequencerGrid()
@@ -58,12 +56,6 @@ void SequencerGrid::resized()
     fbGrid.performLayout(area.toFloat());
 }
 
-void SequencerGrid::timerCallback()
-{
-    for (auto row : rows)
-        row->refresh();
-}
-
 void SequencerGrid::stepSelected(SequencerStep* step)
 {
     if (selectedStep)
@@ -87,6 +79,7 @@ void SequencerGrid::noteChanged()
     probabilitySlider.setEnabled(isNote);
     selectedStep->setNoteNumber(value);
     selectedStep->repaint();
+	processor.updateHostDisplay();
 }
 
 void SequencerGrid::velocityChanged()
@@ -94,6 +87,7 @@ void SequencerGrid::velocityChanged()
     auto value = velocitySlider.s.getValue();
     selectedStep->setVelocity(value);
     selectedStep->repaint();
+	processor.updateHostDisplay();
 }
 
 void SequencerGrid::probabilityChanged()
@@ -101,12 +95,21 @@ void SequencerGrid::probabilityChanged()
     auto value = probabilitySlider.s.getValue();
     selectedStep->setProbability(value);
     selectedStep->repaint();
+	processor.updateHostDisplay();
 }
 
 void SequencerGrid::reset()
 {
     erase();
     sequencer.reset();
+}
+
+void SequencerGrid::refreshRows()
+{
+	for (auto row : rows)
+	{
+		row->refresh();
+	}
 }
 
 void SequencerGrid::erase()

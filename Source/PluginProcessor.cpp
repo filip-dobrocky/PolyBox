@@ -24,7 +24,7 @@ PolyBoxAudioProcessor::PolyBoxAudioProcessor()
                        ),
 #endif
     tuning(std::make_shared<Tuning>()),
-    parameters(*this, nullptr, "PARAMETERS", createParameterLayout())
+    parameters(*this, &undoManager, "PARAMETERS", createParameterLayout())
 {
     scl = tuning->scale;
     kbm = tuning->keyboardMapping;
@@ -148,7 +148,7 @@ const juce::String PolyBoxAudioProcessor::getProgramName (int index)
 
 bool PolyBoxAudioProcessor::canSync()
 {
-    return getPlayHead();
+    return getPlayHead() != nullptr;
 }
 
 MicroSamplerSound* PolyBoxAudioProcessor::loadSample(AudioFormatReader* source, String path, int midiChannel)
@@ -174,8 +174,8 @@ MicroSamplerSound* PolyBoxAudioProcessor::loadSample(AudioFormatReader* source, 
         new MicroSamplerSound(name, source, path, midiChannel, range,
             DEFAULT_ROOT_F, DEFAULT_ATTACK, DEFAULT_RELEASE)));
 	
-    auto paths = parameters.state.getOrCreateChildWithName("paths", nullptr);
-    paths.setProperty("s" + String(midiChannel) + "Path", path, nullptr);
+    auto paths = parameters.state.getOrCreateChildWithName("paths", &undoManager);
+    paths.setProperty("s" + String(midiChannel) + "Path", path, &undoManager);
 
     return sound;
 }
@@ -213,6 +213,16 @@ bool PolyBoxAudioProcessor::loadKbm(String path)
         catch (...) {}
     }
     return success;
+}
+
+void PolyBoxAudioProcessor::setStartingPosition(AudioPlayHead::CurrentPositionInfo info)
+{
+    float position = (info.ppqPosition - info.ppqPositionOfLastBarStart)
+        * (4.0f / info.timeSigDenominator)
+        / (float)info.timeSigNumerator;
+
+    if (position <= 1.0f)
+        sequencer.setNormalizedPosition(position);
 }
 
 void PolyBoxAudioProcessor::changeProgramName (int index, const juce::String& newName)
@@ -308,6 +318,33 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
 		}
 	}
 
+    if (syncOn)
+    {
+        if (auto ph = getPlayHead())
+        {
+            AudioPlayHead::CurrentPositionInfo info;
+            if (ph->getCurrentPosition(info))
+            {
+                sequencer.setTempo(info.bpm);
+                sequencer.setTimeSignature(info.timeSigNumerator, info.timeSigDenominator);
+                if (info.isPlaying && !sequencer.isPlaying())
+                {
+                    setStartingPosition(info);
+                    sequencer.play();
+                }
+                else if (!info.isPlaying && sequencer.isPlaying())
+                {
+                    sequencer.stop();
+                }
+            }
+        }
+    }
+    else
+    {
+        sequencer.setTempo(tempo);
+        sequencer.setTimeSignature(4, 4);
+    }
+
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; i++)
         buffer.clear (i, 0, buffer.getNumSamples());
 
@@ -337,23 +374,6 @@ void PolyBoxAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce
     {
         sequencer.transposeOff();
     }
-
-    if (syncOn)
-    {
-        if (auto ph = getPlayHead())
-        {
-            AudioPlayHead::CurrentPositionInfo info;
-            if (ph->getCurrentPosition(info))
-            {
-                sequencer.setTempo(info.bpm);
-                sequencer.setTimeSignature(info.timeSigNumerator, info.timeSigDenominator);
-            }
-        }
-	}
-	else
-	{
-		sequencer.setTempo(tempo);
-	}
 
     //Sequencer Control
     auto interval = sequencer.getIntervalInSamples();
@@ -420,31 +440,31 @@ void PolyBoxAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
 {
     auto state = parameters.copyState();
 
-    auto tuningProp = state.getOrCreateChildWithName("tuning", nullptr);
-    tuningProp.setProperty("equalTuning", equalTuning, nullptr);
-    tuningProp.setProperty("equalTuningSpan", equalTuningSpan, nullptr);
-    tuningProp.setProperty("equalTuningDivision", equalTuningDivision, nullptr);
-    tuningProp.setProperty("sclPath", sclPath, nullptr);
-    tuningProp.setProperty("kbmPath", kbmPath, nullptr);
+    auto tuningProp = state.getOrCreateChildWithName("tuning", &undoManager);
+    tuningProp.setProperty("equalTuning", equalTuning, &undoManager);
+    tuningProp.setProperty("equalTuningSpan", equalTuningSpan, &undoManager);
+    tuningProp.setProperty("equalTuningDivision", equalTuningDivision, &undoManager);
+    tuningProp.setProperty("sclPath", sclPath, &undoManager);
+    tuningProp.setProperty("kbmPath", kbmPath, &undoManager);
 
     for (int i = 0; i < NUM_VOICES; i++)
     {
         auto voice = sequencer.voices[i];
         auto length = voice->getLength();
-        auto voiceProp = state.getOrCreateChildWithName("seqV" + String(i), nullptr);
-        voiceProp.setProperty("length", length, nullptr);
+        auto voiceProp = state.getOrCreateChildWithName("seqV" + String(i), &undoManager);
+        voiceProp.setProperty("length", length, &undoManager);
         
         String channels = "";
         for (int j = 0; j < NUM_VOICES; j++)
             channels.append(voice->hasChannel(j) ? "1" : "0", 1);
-        voiceProp.setProperty("channels", channels, nullptr);
+        voiceProp.setProperty("channels", channels, &undoManager);
         
         for (int j = 0; j < length; j++) {
             auto note = voice->getNotePtr(j);
-            auto noteProp = voiceProp.getOrCreateChildWithName("note" + String(j), nullptr);
-            noteProp.setProperty("num", note->number, nullptr);
-            noteProp.setProperty("vel", note->velocity, nullptr);
-            noteProp.setProperty("prob", note->probability, nullptr);
+            auto noteProp = voiceProp.getOrCreateChildWithName("note" + String(j), &undoManager);
+            noteProp.setProperty("num", note->number, &undoManager);
+            noteProp.setProperty("vel", note->velocity, &undoManager);
+            noteProp.setProperty("prob", note->probability, &undoManager);
         }
     }
 
@@ -461,7 +481,7 @@ void PolyBoxAudioProcessor::setStateInformation(const void* data, int sizeInByte
         parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
     }
 
-    auto tuningProp = parameters.state.getOrCreateChildWithName("tuning", nullptr);
+    auto tuningProp = parameters.state.getOrCreateChildWithName("tuning", &undoManager);
     equalTuning = (bool)tuningProp.getProperty("equalTuning", false);
     equalTuningSpan = (int)tuningProp.getProperty("equalTuningSpan", 0);
     equalTuningDivision = (int)tuningProp.getProperty("equalTuningDivision", 0);
@@ -495,7 +515,7 @@ void PolyBoxAudioProcessor::setStateInformation(const void* data, int sizeInByte
             continue;
         }
 
-        auto paths = parameters.state.getOrCreateChildWithName("paths", nullptr);
+        auto paths = parameters.state.getOrCreateChildWithName("paths", &undoManager);
         auto path = paths.getProperty("s" + String(i + 1) + "Path", String()).toString();
 
         if (path.isNotEmpty())
@@ -511,7 +531,7 @@ void PolyBoxAudioProcessor::setStateInformation(const void* data, int sizeInByte
             }
         }
 
-        auto voiceProp = parameters.state.getOrCreateChildWithName("seqV" + String(i), nullptr);
+        auto voiceProp = parameters.state.getOrCreateChildWithName("seqV" + String(i), &undoManager);
         auto length = (int)voiceProp.getProperty("length", DEFAULT_STEPS);
         auto voice = sequencer.voices[i];
         auto channels = voiceProp.getProperty("channels", String()).toString();
@@ -528,7 +548,7 @@ void PolyBoxAudioProcessor::setStateInformation(const void* data, int sizeInByte
 
         for (int j = 0; j < length; j++)
         {
-            auto noteProp = voiceProp.getOrCreateChildWithName("note" + String(j), nullptr);
+            auto noteProp = voiceProp.getOrCreateChildWithName("note" + String(j), &undoManager);
             auto num = (int)noteProp.getProperty("num", -1);
             auto vel = (float)noteProp.getProperty("vel", 0.5f);
             auto prob = (float)noteProp.getProperty("prob", 1.0f);

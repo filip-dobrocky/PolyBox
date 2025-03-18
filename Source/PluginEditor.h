@@ -23,12 +23,14 @@ typedef juce::AudioProcessorValueTreeState::ButtonAttachment ButtonAttachment;
 */
 class PolyBoxAudioProcessorEditor : public juce::AudioProcessorEditor
 {
-    struct MainPage : Component
+    struct MainPage : Component,
+                      Timer
     {
         MainPage(PolyBoxAudioProcessor&);
         ~MainPage();
 
         void resized() override;
+        void timerCallback() override;
 
         SequencerGrid* sequencerGrid;
 

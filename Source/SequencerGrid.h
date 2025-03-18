@@ -11,6 +11,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "PluginProcessor.h"
 #include "PolySequencer.h"
 #include "SequencerStep.h"
 #include "Components.h"
@@ -20,8 +21,7 @@
 */
 
 class SequencerGrid : public juce::Component,
-                      public SequencerStep::Listener,
-                      public Timer
+                      public SequencerStep::Listener
 {
 
     class SequencerRow : public Component
@@ -52,18 +52,18 @@ class SequencerGrid : public juce::Component,
     };
 
 public:
-    SequencerGrid(PolySequencer& sequencer);
+    SequencerGrid(PolyBoxAudioProcessor& p);
     ~SequencerGrid() override;
 
     void paint(juce::Graphics&) override;
     void resized() override;
-    void timerCallback() override;
-
     void reset();
+	void refreshRows();
 
     void stepSelected(SequencerStep* step) override;
 
 private:
+	PolyBoxAudioProcessor& processor;
     PolySequencer& sequencer;
     SequencerRow* rows[NUM_VOICES];
     SequencerStep* selectedStep{ nullptr };

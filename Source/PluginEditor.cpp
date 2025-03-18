@@ -53,11 +53,16 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
                                                                             sequencer(p.sequencer),
                                                                             samplerComponent(p)
 {
-    sequencerGrid = new SequencerGrid(sequencer);
+    sequencerGrid = new SequencerGrid(audioProcessor);
     addAndMakeVisible(sequencerGrid);
 
 
-    playButton.onClick = [&] { if (playButton.getToggleState()) sequencer.play(); else sequencer.stop(); };
+    playButton.onClick = [&] { 
+		if (playButton.getToggleState())
+			sequencer.play();
+        else
+			sequencer.stop();
+    };
     resetButton.onClick = [&] { sequencerGrid->reset(); };
     
     addAndMakeVisible(playButton);
@@ -70,7 +75,7 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
 
     if (p.canSync())
     {
-        syncButton.setButtonText("Sync");
+        syncButton.setButtonText("Host Sync");
         syncButton.changeWidthToFitText();
         syncButton.setClickingTogglesState(true);
         syncButton.onClick = [&] { toggleSync(); };
@@ -83,8 +88,11 @@ PolyBoxAudioProcessorEditor::MainPage::MainPage(PolyBoxAudioProcessor& p) : audi
 	bpmAttachment.reset(new SliderAttachment(p.parameters, "tempo", bpmSlider));
 
     addAndMakeVisible(durationSlider);
-
     addAndMakeVisible(samplerComponent);
+
+	toggleSync();
+ 
+    startTimer(30);
 }
 
 PolyBoxAudioProcessorEditor::MainPage::~MainPage()
@@ -111,13 +119,20 @@ void PolyBoxAudioProcessorEditor::MainPage::resized()
     samplerComponent.setBounds(bounds.removeFromRight(getWidth()/4));
     sequencerGrid->setBounds(bounds.reduced(8));
 }
-   
+
+void PolyBoxAudioProcessorEditor::MainPage::timerCallback()
+{
+	sequencerGrid->refreshRows();
+	playButton.setToggleState(sequencer.isPlaying(), NotificationType::dontSendNotification);
+}  
 
 void PolyBoxAudioProcessorEditor::MainPage::toggleSync()
 {
     const auto state = syncButton.getToggleState();
 
     bpmSlider.setEnabled(!state);
+	playButton.setEnabled(!state);
+	resetButton.setEnabled(!state);
 }
 
 void PolyBoxAudioProcessorEditor::MainPage::durationChanged()

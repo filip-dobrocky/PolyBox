@@ -41,6 +41,7 @@ public:
 	void setSampleRate(int sampleRate);
 	void transpose(int rootNote, int transposeNote);
 	void transposeOff();
+	void setNormalizedPosition(float position);
 
 private:
 	int steps;
