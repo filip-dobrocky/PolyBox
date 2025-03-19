@@ -10,8 +10,8 @@ struct Note {
 	float velocity;
 	double probability;
 
-	Note::Note() : number(-1), velocity (0.5f), probability(1) {}
-	Note::Note(int num, float vel, double prob) : number(num), velocity(vel), probability(prob) {}
+	Note() : number(-1), velocity (0.5f), probability(1) {}
+	Note(int num, float vel, double prob) : number(num), velocity(vel), probability(prob) {}
 };
 
 class SequencerVoice {

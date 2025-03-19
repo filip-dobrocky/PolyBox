@@ -145,8 +145,9 @@ void PolySequencer::tick(int sample)
 
 			auto buffer = voices[i]->getNoteOff(sample);
 			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
-
-			buffer.swapWith(voices[i]->getNoteOn(sample + 1, transposition));
+			
+			MidiBuffer noteOnBuffer = voices[i]->getNoteOn(sample + 1, transposition);
+			buffer.swapWith(noteOnBuffer);
 			midiMessages.addEvents(buffer, buffer.getFirstEventTime(), buffer.getLastEventTime(), 0);
 		}
 	}
