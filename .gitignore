@@ -342,3 +342,5 @@ healthchecksdb
 Builds/
 
 JuceLibraryCode/
+
+.vscode/

@@ -1,5 +1,15 @@
 {
     "files.associations": {
         "algorithm": "cpp"
-    }
+    },
+    "makefile.makefilePath": "${workspaceFolder}/Builds/LinuxMakefile/Makefile",
+    "makefile.configurations": [
+        {
+            "name": "Default",
+            "makeArgs": [],
+            "makeFlags": "",
+            "makefilePath": "${workspaceFolder}/Builds/LinuxMakefile/Makefile",
+            "buildDirectory": "${workspaceFolder}/Builds/LinuxMakefile"
+        }
+    ]
 }
